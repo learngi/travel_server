@@ -190,72 +190,77 @@ const news = [
       const data = request.payload;
       const { status } = request.payload;
       const image = request.payload.image.hapi.filename;
-      console.log('payload', status, image);
 
       if (request.payload.image.hapi.filename) {
         const fileName = request.payload.image.hapi.filename;
         const path = config.upload_folder + fileName;
         const file = fs.createWriteStream(path);
 
-        file.on('error', err => {
-          console.log('ff', err);
-          // log.error(err);
-        });
+        file.on('error', async err => {});
 
-        // insert data into database
-        data.image.pipe(file);
-        console.log('ffa', image);
         await knex('carousel')
           .insert({
             status,
             image
           })
-          .then(res => {
-            res = {
-              success: true,
-              message: 'upload successfully'
-            };
+          .then(([data]) => {
+            console.log('her')
+            if (data) {
+              res = {
+                success: true,
+                message: 'upload successfully'
+              };
+            }
           })
-          .catch(err => {});
+          .catch(err => {
+            console.log('err', err);
+          });
 
-        data.file.on('end', err => {
+        // insert data into database
+        await data.image.pipe(file);
+
+        data.image.on('end', err => {
           if (err) {
             res = {
               success: false,
-              message: 'File upload failed, please try again'
+              message: `"File upload failed, please try again"`
             };
           }
         });
       }
+      console.log('res121', res);
+      return res;
     }
   },
 
   // get Images list (carousel)
   {
-      path: '/getImages',
-      method: 'GET',
-      config: {
-        auth: {
-          mode: 'optional',
-        }
-      },
-      handler: async (request) => {
-        let reply = null;
-        await knex.raw(`select id, image, status from carousel where status = 1`).then(([data]) => {
-          if(!data) {
+    path: '/getImages',
+    method: 'GET',
+    config: {
+      auth: {
+        mode: 'optional'
+      }
+    },
+    handler: async request => {
+      let reply = null;
+      await knex
+        .raw(`select id, image, status from carousel where status = 1`)
+        .then(([data]) => {
+          if (!data) {
             reply = {
               success: false,
               message: 'No carousel images are found'
-            }
+            };
           } else {
             reply = {
               success: true,
               data
-            }
+            };
           }
         });
-         return reply;
-      }
+      return reply;
+    }
   },
 
   // get news list
@@ -268,37 +273,40 @@ const news = [
         mode: 'optional'
       }
     },
-    handler: async (request) => {
+    handler: async request => {
       let reply = null;
       const data = [];
-      let newArray = [{
-        id: 1,
-        title: 'Exams',
-        description: 'Govt exams are been postponed to next month'}, 
+      let newArray = [
+        {
+          id: 1,
+          title: 'Exams',
+          description: 'Govt exams are been postponed to next month'
+        },
         {
           id: 2,
           title: 'Sports',
           description: 'India won against pakistan by 4 wickets'
         },
         {
-          id:3,
+          id: 3,
           title: 'Politics',
           description: 'text'
-        }]
+        }
+      ];
 
-        newArray.forEach(item =>{
-          data.push({
-            id: item.id,
-            title: item.title,
-            description: item.description
-          })
-        })
-      
+      newArray.forEach(item => {
+        data.push({
+          id: item.id,
+          title: item.title,
+          description: item.description
+        });
+      });
+
       console.log(data);
       reply = {
         success: true,
         data
-      }
+      };
       return reply;
     }
   }
