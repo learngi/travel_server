@@ -317,23 +317,25 @@ const news = [
       console.log("path", path);
       const coverPageData = [];
       const collegeData = [];
-      const p = `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,
+      await knex
+        .raw(
+          `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,
       (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
-      from news_events.news_events ne limit 5`;
-      console.log("p query", p);
-      await knex.raw(p).then(async ([data]) => {
-        if (!data) {
-          reply = {
-            success: false,
-            message: "No news or event data is available"
-          };
-        } else {
-          reply = {
-            success: true,
-            data
-          };
-        }
-      });
+      from news_events.news_events ne limit 5`
+        )
+        .then(async ([data]) => {
+          if (!data) {
+            reply = {
+              success: false,
+              message: "No news or event data is available"
+            };
+          } else {
+            reply = {
+              success: true,
+              data
+            };
+          }
+        });
       return reply;
     }
   }
