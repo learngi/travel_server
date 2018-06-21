@@ -276,7 +276,7 @@ const news = [
               data.forEach(item => {
                 input.push({
                   id: item.id,
-                  image: "http://" + path + "/" + item.image,
+                  image: "http://" + path + "/image/" + item.image,
                   status: item.status
                 });
               });
