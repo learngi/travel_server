@@ -326,7 +326,7 @@ const news = [
 
   // get Original news list
   {
-    path: "/getNewsList",
+    path: "/news",
     method: "GET",
     config: {
       auth: {
@@ -345,7 +345,7 @@ const news = [
         .raw(
           `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,ne.event_date,
       (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
-      from news_events.news_events ne limit 5`
+      from news_events.news_events ne order by ne.event_date desc limit 5 `
         )
         .then(async ([data]) => {
           if (!data) {
