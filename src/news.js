@@ -248,6 +248,7 @@ const news = [
     },
     handler: async request => {
       let reply = null;
+      // if(request.pa)
       await knex
         .raw(`select id, image, status from carousel`)
         .then(([data]) => {
@@ -319,7 +320,7 @@ const news = [
       const collegeData = [];
       await knex
         .raw(
-          `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,
+          `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,ne.event_date,
       (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
       from news_events.news_events ne limit 5`
         )

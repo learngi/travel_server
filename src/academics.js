@@ -20,12 +20,13 @@ const academics = [
       let allCoursesdata = [];
       const coursesData = {};
       const branchesData = {};
-      const yearData = [];
+      const yearData = {};
+      const semesterData = {};
       const subjectsData = [];
       const sectionsData = [];
       await knex
         .raw(
-          `select c.id, c.college, c.full_name as fullname from  raghuerp_db.colleges c`
+          `select c.id, c.college, c.full_name as fullname from  raghuerp_db.colleges c where c.status = 1`
         )
         .then(async ([data]) => {
           if (!data) {
@@ -37,9 +38,11 @@ const academics = [
             collegeData = data;
             coursesData["courses"] = [];
             branchesData["branches"] = [];
+            yearData["years"] = [];
+            semesterData["semester"] = [];
             await knex
               .raw(
-                `select c.id as course_id, c.course, c.college, c.fullname from raghuerp_db.courses c`
+                `select c.id as course_id, c.course, c.college, c.fullname from raghuerp_db.courses c where c.status = 1`
               )
               .then(async ([res]) => {
                 if (!res) {
@@ -66,9 +69,9 @@ const academics = [
                   console.log("courseData", collegeData);
                   await knex
                     .raw(
-                      `select b.id, b.branch, b.course, b.fullname from raghuerp_db.branches b `
+                      `select b.id, b.branch, b.course, b.fullname from raghuerp_db.branches b where b.status = 1`
                     )
-                    .then(([res1]) => {
+                    .then(async ([res1]) => {
                       if (!res1) {
                         reply = {
                           success: false,
@@ -94,10 +97,122 @@ const academics = [
                                 });
                               }
                             }
-                            collegeData[i].courses[j]["branches"] = branchesData["branches"];
-                          branchesData["branches"] = [];
+                            collegeData[i].courses[j]["branches"] =
+                              branchesData["branches"];
+                            branchesData["branches"] = [];
                           }
                         }
+                        await knex
+                          .raw(
+                            `select y.id as year_id, y.year, y.branch as branch_id from raghuerp_db.year y`
+                          )
+                          .then(async ([yearRes]) => {
+                            if (!yearRes) {
+                              reply = {
+                                success: false,
+                                message: "No year data is available"
+                              };
+                            } else {
+                              // console.log("yeardata", yearRes);
+                              for (let i = 0; i < collegeData.length; i++) {
+                                for (
+                                  let j = 0;
+                                  j < collegeData[i].courses.length;
+                                  j++
+                                ) {
+                                  for (
+                                    let k = 0;
+                                    k <
+                                    collegeData[i].courses[j].branches.length;
+                                    k++
+                                  ) {
+                                    for (let m = 0; m < yearRes.length; m++) {
+                                      if (
+                                        yearRes[m].branch_id ===
+                                        collegeData[i].courses[j].branches[k]
+                                          .branch_id
+                                      ) {
+                                        // console.log('test', yearRes[m].id);
+                                        yearData["years"].push({
+                                          year_id: yearRes[m].year_id,
+                                          year: yearRes[m].year,
+                                          branch_id: yearRes[m].branch_id
+                                        });
+                                      }
+                                    }
+                                    // console.log("yearData", yearData["years"]);
+                                    collegeData[i].courses[j].branches[k][
+                                      "years"
+                                    ] =
+                                      yearData["years"];
+                                    yearData["years"] = [];
+                                  }
+                                }
+                              }
+                              // console.log("collegeData", collegeData);
+                            }
+                            await knex
+                              .raw(
+                                `select sem.id as sem_id, sem.year_id, sem.semister from raghuerp_timetable.year_subject sem`
+                              )
+                              .then(async ([semRes]) => {
+                                if (!semRes) {
+                                  reply = {
+                                    success: false,
+                                    message: "No semester data is available"
+                                  };
+                                } else {
+                                  // console.log("semres", semRes);
+                                  for (let i = 0; i < collegeData.length; i++) {
+                                    for (
+                                      let j = 0;
+                                      j < collegeData[i].courses.length;
+                                      j++
+                                    ) {
+                                      for (
+                                        let k = 0;
+                                        k <
+                                        collegeData[i].courses[j].branches
+                                          .length;
+                                        k++
+                                      ) {
+                                        for (
+                                          let m = 0;
+                                          m <
+                                          collegeData[i].courses[j].branches[k]
+                                            .years.length;
+                                          m++
+                                        ) {
+                                          for (
+                                            let n = 0;
+                                            n < semRes.length;
+                                            n++
+                                          ) {
+                                            if (
+                                              semRes[n].year_id ===
+                                              collegeData[i].courses[j]
+                                                .branches[k].years[m].year_id
+                                            ) {
+                                              semesterData["semester"].push({
+                                                semester: semRes[n].semister,
+                                                sem_id: semRes[n].sem_id,
+                                                year_id: semRes[n].year_id
+                                              });
+                                            }
+                                          }
+                                          collegeData[i].courses[j].branches[
+                                            k
+                                          ].years[m]["semester"] =
+                                            semesterData["semester"];
+                                          semesterData["semester"] = [];
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                                // await knex.raw(`select `)
+                              });
+                          });
                       }
                     });
                 }

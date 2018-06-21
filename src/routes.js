@@ -144,9 +144,10 @@ const routes = [
     handler: async request => {
       let reply = null;
       const { college_id } = request.params;
+      console.log('college_id', college_id);
       await knex
         .raw(
-          `select cour.id, cour.course, cour.college as college_id, c.college, cour.fullname from courses cour inner join colleges c on c.id = cour.college and c.status = 1 where cour.status = 1 and c.id = ${college_id}`
+          `select cour.id, cour.course, cour.college as college_id, c.college, cour.fullname from raghuerp_db.courses cour inner join raghuerp_db.colleges c on c.id = cour.college and c.status = 1 where cour.status = 1 and c.id = ${college_id}`
         )
         .then(async ([data]) => {
           if (!data) {
@@ -159,6 +160,10 @@ const routes = [
               success: true,
               data
             };
+          }
+        }).catch(err => {
+          if(err) {
+            console.log(err);
           }
         });
       return reply;
@@ -179,7 +184,7 @@ const routes = [
       const { course_id } = request.params;
       await knex
         .raw(
-          `select b.id, b.branch, b.course as course_id, cour.fullname as course, b.fullname,b.department as dept_id, d.full_name as department from branches b inner join courses cour on cour.id = b.course and cour.status = 1 inner join departments d on d.id = b.department and d.status = 1 where b.status = 1 and cour.id = ${course_id}`
+          `select b.id, b.branch, b.course as course_id, cour.fullname as course, b.fullname,b.department as dept_id, d.full_name as department from raghuerp_db.branches b inner join raghuerp_db.courses cour on cour.id = b.course and cour.status = 1 inner join raghuerp_db.departments d on d.id = b.department and d.status = 1 where b.status = 1 and cour.id = ${course_id}`
         )
         .then(async ([data]) => {
           if (!data) {
