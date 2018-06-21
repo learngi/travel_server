@@ -283,7 +283,7 @@ const news = [
             }
             reply = {
               success: true,
-              input
+              data: input
             };
           }
         });
