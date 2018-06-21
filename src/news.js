@@ -239,7 +239,7 @@ const news = [
 
   // get Images list (carousel)
   {
-    path: "/getImages",
+    path: "/carousel/{id}",
     method: "GET",
     config: {
       auth: {
@@ -248,6 +248,10 @@ const news = [
     },
     handler: async request => {
       let reply = null;
+      const input = [];
+      const { id } = request.params;
+      const path = config.database.host + ":" + config.server.port;
+      console.log(path);
       // if(request.pa)
       await knex
         .raw(`select id, image, status from carousel`)
@@ -258,9 +262,28 @@ const news = [
               message: "No carousel images are found"
             };
           } else {
+            if (id === 1) {
+              data.forEach(item => {
+                if (item.status !== 0) {
+                  input.push({
+                    id: item.id,
+                    image: path + item.image,
+                    status: item.status
+                  });
+                }
+              });
+            } else {
+              data.forEach(item => {
+                input.push({
+                  id: item.id,
+                  image: path + '/' + item.image,
+                  status: item.status
+                });
+              });
+            }
             reply = {
               success: true,
-              data
+              input
             };
           }
         });

@@ -5,10 +5,11 @@ module.exports = {
     token: "Ifyourserverisbehindareverseproxyyoumustwhitelisttheproxy"
   },
   database: {
-    host: "localhost",
+    // host: "localhost",
+    host: "172.16.16.101",
     db: "rei",
     username: "root",
-    password: ""
+    password: "EnMontoR"
   },
   upload_folder: "F:/REI/REI_SERVER/images/"
 };
