@@ -2,6 +2,7 @@
 
 import routes from "./src/routes";
 import news from "./src/news";
+import academics from "./src/academics";
 import jwt from "jsonwebtoken";
 
 // import routes from "src/routes";
@@ -47,7 +48,7 @@ async function init() {
 
   server.auth.default("token");
 
-  const allRoutes = [...routes, ...news];
+  const allRoutes = [...routes, ...news, ...academics];
   allRoutes.forEach(item => {
     server.route(item);
   });

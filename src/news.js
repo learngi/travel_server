@@ -1,16 +1,16 @@
-const knex = require('../knex');
-const config = require('../src/config');
-const generator = require('generate-password');
-const fs = require('fs');
+const knex = require("../knex");
+const config = require("../src/config");
+const generator = require("generate-password");
+const fs = require("fs");
 
 const news = [
   // get All Categories
   {
-    path: '/getCategory',
-    method: 'GET',
+    path: "/getCategory",
+    method: "GET",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
@@ -21,7 +21,7 @@ const news = [
           if (!data) {
             reply = {
               success: false,
-              message: 'No category data is available'
+              message: "No category data is available"
             };
           } else {
             reply = {
@@ -31,7 +31,7 @@ const news = [
           }
         })
         .catch(err => {
-          console.log('err', err);
+          console.log("err", err);
         });
       return reply;
     }
@@ -39,12 +39,12 @@ const news = [
 
   // get All Tags
   {
-    path: '/getTags',
-    method: 'GET',
+    path: "/getTags",
+    method: "GET",
     config: {
       auth: {
         // strategy: "token",
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
@@ -53,7 +53,7 @@ const news = [
         if (!data) {
           reply = {
             success: false,
-            message: 'No tags data is available'
+            message: "No tags data is available"
           };
         } else {
           reply = {
@@ -68,18 +68,18 @@ const news = [
 
   // insert news
   {
-    path: '/insertNews',
-    method: 'POST',
+    path: "/insertNews",
+    method: "POST",
     config: {
       auth: {
         // strategy: "token"
-        mode: 'optional'
+        mode: "optional"
       },
       payload: {
-        output: 'stream',
+        output: "stream",
         maxBytes: 1000048576,
         parse: true,
-        allow: 'multipart/form-data',
+        allow: "multipart/form-data",
         timeout: 110000
       }
     },
@@ -94,15 +94,15 @@ const news = [
       console.log(request.payload.date);
       const translateData = JSON.parse(request.payload.date.data);
       const { id, title, description, status } = translateData;
-      console.log('date', request.payload);
+      console.log("date", request.payload);
       //   console.log("data", request.payload.data);
-      console.log('image', request.payload.image);
+      console.log("image", request.payload.image);
       if (request.payload.image.hapi !== undefined) {
         image = request.payload.image.hapi.filename;
       } else {
         image = request.payload.image;
       }
-      console.log('image', image);
+      console.log("image", image);
 
       if (request.payload.image.hapi !== undefined) {
         const path = config.upload_folder + request.payload.image.hapi.filename;
@@ -118,8 +118,8 @@ const news = [
       };
       await knex.transaction(async t => {
         try {
-          console.log('newsdata', newsdata);
-          await insertOrUpdate(t, 'news', newsdata)
+          console.log("newsdata", newsdata);
+          await insertOrUpdate(t, "news", newsdata)
             .then(([data]) => {
               if (data) {
                 if (data.insertId === 0) {
@@ -130,7 +130,7 @@ const news = [
               }
             })
             .catch(err => {
-              console.log('err', err);
+              console.log("err", err);
             });
 
           translateData.category_id.forEach(item => {
@@ -139,8 +139,8 @@ const news = [
               news_id
             });
           });
-          console.log('categoryData', categoryData);
-          await insertOrUpdate(t, 'news_categories', categoryData);
+          console.log("categoryData", categoryData);
+          await insertOrUpdate(t, "news_categories", categoryData);
 
           translateData.tag_id.forEach(item => {
             tagData.push({
@@ -148,8 +148,8 @@ const news = [
               news_id
             });
           });
-          console.log('tagsdata', tagData);
-          await insertOrUpdate(t, 'news_tags', tagData);
+          console.log("tagsdata", tagData);
+          await insertOrUpdate(t, "news_tags", tagData);
 
           await t.commit();
           reply = {
@@ -158,7 +158,7 @@ const news = [
         } catch (err) {
           await t.rollback();
           error = true;
-          message = 'ERROR';
+          message = "ERROR";
           reply = {
             success: false
           };
@@ -170,17 +170,17 @@ const news = [
 
   // carousel upload
   {
-    method: 'POST',
-    path: '/carouselUpload',
+    method: "POST",
+    path: "/carouselUpload",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       },
       payload: {
-        output: 'stream',
+        output: "stream",
         maxBytes: 10048576,
         parse: true,
-        allow: 'multipart/form-data',
+        allow: "multipart/form-data",
         timeout: 110000
       }
     },
@@ -196,30 +196,34 @@ const news = [
         const path = config.upload_folder + fileName;
         const file = fs.createWriteStream(path);
 
-        file.on('error', async err => {});
+        // console.log('file', file);
 
-        await knex('carousel')
+        file.on("error", async err => {
+          console.log("errr", err);
+        });
+
+        await knex("carousel")
           .insert({
             status,
             image
           })
           .then(([data]) => {
-            console.log('her')
+            console.log("her");
             if (data) {
               res = {
                 success: true,
-                message: 'upload successfully'
+                message: "upload successfully"
               };
             }
           })
           .catch(err => {
-            console.log('err', err);
+            console.log("err", err);
           });
 
         // insert data into database
         await data.image.pipe(file);
 
-        data.image.on('end', err => {
+        data.image.on("end", err => {
           if (err) {
             res = {
               success: false,
@@ -228,29 +232,29 @@ const news = [
           }
         });
       }
-      console.log('res121', res);
+      console.log("res121", res);
       return res;
     }
   },
 
   // get Images list (carousel)
   {
-    path: '/getImages',
-    method: 'GET',
+    path: "/getImages",
+    method: "GET",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
       let reply = null;
       await knex
-        .raw(`select id, image, status from carousel where status = 1`)
+        .raw(`select id, image, status from carousel`)
         .then(([data]) => {
           if (!data) {
             reply = {
               success: false,
-              message: 'No carousel images are found'
+              message: "No carousel images are found"
             };
           } else {
             reply = {
@@ -263,50 +267,73 @@ const news = [
     }
   },
 
-  // get news list
+  // EDIT IMAGES (CAROUSEL)
   {
-    path: '/getNewsList',
-    method: 'GET',
+    path: "/editCarousel",
+    method: "POST",
     config: {
       auth: {
-        // strategy: 'token'
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
       let reply = null;
-      const data = [];
-      let newArray = [
-        {
-          id: 1,
-          title: 'Exams',
-          description: 'Govt exams are been postponed to next month'
-        },
-        {
-          id: 2,
-          title: 'Sports',
-          description: 'India won against pakistan by 4 wickets'
-        },
-        {
-          id: 3,
-          title: 'Politics',
-          description: 'text'
-        }
-      ];
-
-      newArray.forEach(item => {
-        data.push({
-          id: item.id,
-          title: item.title,
-          description: item.description
+      console.log(request.payload);
+      const { id, status } = JSON.parse(request.payload);
+      console.log(id, status);
+      await knex
+        .raw(`update carousel set status = ${status} where id = ${id}`)
+        .then(([data]) => {
+          if (!data) {
+            reply = {
+              success: false,
+              message: "failed to update'"
+            };
+          } else {
+            reply = {
+              success: true,
+              data
+            };
+          }
         });
-      });
+      return reply;
+    }
+  },
 
-      console.log(data);
-      reply = {
-        success: true,
-        data
-      };
+  // get Original news list
+  {
+    path: "/getNewsList",
+    method: "GET",
+    config: {
+      auth: {
+        // strategy: 'token'
+        mode: "optional"
+      }
+    },
+    handler: async request => {
+      let reply = null;
+      const path =
+        "http://www.raghueducational.org/cms/server/images/news_events/";
+      console.log("path", path);
+      const coverPageData = [];
+      const collegeData = [];
+      const p = `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,
+      (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
+      from news_events.news_events ne limit 5`;
+      console.log("p query", p);
+      await knex.raw(p).then(async ([data]) => {
+        if (!data) {
+          reply = {
+            success: false,
+            message: "No news or event data is available"
+          };
+        } else {
+          reply = {
+            success: true,
+            data
+          };
+        }
+      });
       return reply;
     }
   }
@@ -314,7 +341,7 @@ const news = [
 
 async function insertOrUpdate(knex, tableName, data) {
   const firstData = data[0] ? data[0] : data;
-  console.log('data', data);
+  console.log("data", data);
   return knex.raw(
     `${knex(tableName)
       .insert(data)
@@ -322,7 +349,7 @@ async function insertOrUpdate(knex, tableName, data) {
       firstData
     )
       .map(field => `${field}=VALUES(${field})`)
-      .join(',  ')}`
+      .join(",  ")}`
   );
 }
 
