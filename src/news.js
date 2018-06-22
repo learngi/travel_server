@@ -186,6 +186,7 @@ const news = [
     },
 
     handler: async request => {
+      console.log("carousel Upload");
       let res = null;
       const data = request.payload;
       const { status } = request.payload;
@@ -348,6 +349,47 @@ const news = [
           `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,ne.event_date,
       (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
       from news_events.news_events ne order by ne.event_date desc limit 5 `
+        )
+        .then(async ([data]) => {
+          if (!data) {
+            reply = {
+              success: false,
+              message: "No news or event data is available"
+            };
+          } else {
+            reply = {
+              success: true,
+              data
+            };
+          }
+        });
+      return reply;
+    }
+  }, 
+
+  // get news by id
+  {
+    path: "/news/{id}",
+    method: "GET",
+    config: {
+      auth: {
+        // strategy: 'token'
+        mode: "optional"
+      }
+    },
+    handler: async request => {
+      let reply = null;
+      const { id } = request.params;
+      const path =
+        "http://www.raghueducational.org/cms/server/images/news_events/";
+      console.log("path", path);
+      const coverPageData = [];
+      const collegeData = [];
+      await knex
+        .raw(
+          `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,ne.event_date,
+      (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
+      from news_events.news_events ne where ne.id = ${id}`
         )
         .then(async ([data]) => {
           if (!data) {
