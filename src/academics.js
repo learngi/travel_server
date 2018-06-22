@@ -392,6 +392,7 @@ const academics = [
                                               "No subjects data is available"
                                           };
                                         } else {
+                                          console.log("subRes", subRes);
                                           for (
                                             let i = 0;
                                             i < clgData.length;
@@ -425,108 +426,79 @@ const academics = [
                                                   m < yeData.length;
                                                   m++
                                                 ) {
-                                                  console.log("te", yeData[m]);
-                                                  const seData = Object.keys(
+                                                  const semData = Object.keys(
                                                     collegeData[clgData[i]]
                                                       .courses[couData[j]]
                                                       .branches[branData[k]]
-                                                      .years[yeData[k]].semester
+                                                      .years[yeData[m]].semester
+                                                  );
+                                                  console.log(
+                                                    "semData",
+                                                    semData
                                                   );
                                                   for (
                                                     let n = 0;
-                                                    n < seData.length;
+                                                    n < semData.length;
                                                     n++
                                                   ) {
-                                                    console.log(
-                                                      "seData",
-                                                      collegeData[clgData[i]]
-                                                        .courses[couData[j]]
-                                                        .branches[branData[k]]
-                                                        .years[yeData[k]]
-                                                        .semester
-                                                    );
-                                                    console.log(
-                                                      "se",
-                                                      seData[n]
-                                                    );
                                                     collegeData[
                                                       clgData[i]
                                                     ].courses[
                                                       couData[j]
                                                     ].branches[
                                                       branData[k]
-                                                    ].years[yeData[k]].semester[
-                                                      seData[n]
-                                                    ][
-                                                      "subjects"
-                                                    ] = new Object();
+                                                    ].years[yeData[m]].semester[
+                                                      semData[n]
+                                                    ]["subjects"] = {};
                                                     for (
                                                       let p = 0;
                                                       p < subRes.length;
                                                       p++
                                                     ) {
-                                                      console.log(
-                                                        "testing",
-                                                        collegeData[clgData[i]]
-                                                          .courses[couData[j]]
-                                                          .branches[branData[k]]
-                                                          .years[yeData[m]]
-                                                          .semester,
-                                                        seData[n]
-                                                      );
+                                                      if (semData[n]) {
+                                                        // // console.log('semData', subRes[n]
+                                                        // .semister_id)
 
-                                                      // if (
-                                                      //   collegeData[clgData[i]]
-                                                      //     .courses[couData[j]]
-                                                      //     .branches[branData[k]]
-                                                      //     .years[yeData[m]]
-                                                      //     .semester[seData[n]]
-                                                      // ) {
-                                                      if (
-                                                        collegeData[clgData[i]]
-                                                          .courses[couData[j]]
-                                                          .branches[branData[k]]
-                                                          .years[yeData[m]]
-                                                          .semester[seData[n]]
-                                                          .sem_id ===
-                                                        subRes[p].semister_id
-                                                      ) {
-                                                        collegeData[
-                                                          clgData[i]
-                                                        ].courses[
-                                                          couData[j]
-                                                        ].branches[
-                                                          branData[k]
-                                                        ].years[
-                                                          yeData[m]
-                                                        ].semester[seData[n]][
-                                                          "subjects"
-                                                        ][subRes[p].id] = {
-                                                          subject_id:
-                                                            subRes[p].id,
-                                                          subject_name:
-                                                            subRes[p]
-                                                              .subject_name,
-                                                          subject_code:
-                                                            subRes[p]
-                                                              .subject_code,
-                                                          sem_id:
-                                                            subRes[p]
-                                                              .semister_id
-                                                        };
+                                                        if (
+                                                          subRes[p]
+                                                            .semister_id ===
+                                                          collegeData[
+                                                            clgData[i]
+                                                          ].courses[couData[j]]
+                                                            .branches[
+                                                            branData[k]
+                                                          ].years[yeData[m]]
+                                                            .semester[
+                                                            semData[n]
+                                                          ].sem_id
+                                                        )
+                                                          collegeData[
+                                                            clgData[i]
+                                                          ].courses[
+                                                            couData[j]
+                                                          ].branches[
+                                                            branData[k]
+                                                          ].years[
+                                                            yeData[m]
+                                                          ].semester[
+                                                            semData[n]
+                                                          ]["subjects"][
+                                                            subRes[p].id
+                                                          ] = {
+                                                            subject_id:
+                                                              subRes[p].id,
+                                                            subject_name:
+                                                              subRes[p]
+                                                                .subject_name,
+                                                            subject_code:
+                                                              subRes[p]
+                                                                .subject_code,
+                                                            sem_id:
+                                                              subRes[p]
+                                                                .semister_id
+                                                          };
                                                       }
-                                                      // }
                                                     }
-                                                    // console.log(
-                                                    //   subjectsData["subjects"]
-                                                    // );
-                                                    // collegeData[i].courses[
-                                                    //   j
-                                                    // ].branches[k].years[m].semester[
-                                                    //   n
-                                                    // ]["subjects"] =
-                                                    //   subjectsData["subjects"];
-                                                    // subjectsData["subjects"] = [];
                                                   }
                                                 }
                                               }
