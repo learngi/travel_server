@@ -268,7 +268,8 @@ const news = [
                   input.push({
                     id: item.id,
                     image: path + item.image,
-                    status: item.status
+                    status: item.status,
+                    image_name: item.image
                   });
                 }
               });
@@ -277,7 +278,8 @@ const news = [
                 input.push({
                   id: item.id,
                   image: "http://" + path + "/image/" + item.image,
-                  status: item.status
+                  status: item.status,
+                  image_name: item.image
                 });
               });
             }
