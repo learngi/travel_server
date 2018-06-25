@@ -85,7 +85,7 @@ const routes = [
             console.log("2");
             reply = {
               success: true,
-              message: "Lpogin suceccsjk",
+              message: "Login succefully",
               data: userData,
               token
             };
@@ -144,7 +144,7 @@ const routes = [
     handler: async request => {
       let reply = null;
       const { college_id } = request.params;
-      console.log('college_id', college_id);
+      console.log("college_id", college_id);
       await knex
         .raw(
           `select cour.id, cour.course, cour.college as college_id, c.college, cour.fullname from raghuerp_db.courses cour inner join raghuerp_db.colleges c on c.id = cour.college and c.status = 1 where cour.status = 1 and c.id = ${college_id}`
@@ -161,8 +161,9 @@ const routes = [
               data
             };
           }
-        }).catch(err => {
-          if(err) {
+        })
+        .catch(err => {
+          if (err) {
             console.log(err);
           }
         });
@@ -242,15 +243,17 @@ const routes = [
     method: "GET",
     config: {
       auth: {
-        strategy: "token"
+        // strategy: "token"
+        mode: "optional"
       }
     },
     handler: async request => {
+      console.log('testfsdafasfsadfing')
       let reply = null;
       const { year_id } = request.params;
       await knex
         .raw(
-          `select s.id as section_id, s.section, s.year as year_id from sections s inner join year y on y.id = s.year where y.id = ${year_id}`
+          `select s.id as section_id, s.section, s.year as year_id from raghuerp_db.sections s inner join raghuerp_db.year y on y.id = s.year where y.id = ${year_id}`
         )
         .then(([data]) => {
           if (!data) {
@@ -264,6 +267,9 @@ const routes = [
               data
             };
           }
+        })
+        .catch(err => {
+          console.log(err);
         });
       return reply;
     }
@@ -309,7 +315,8 @@ const routes = [
     method: "GET",
     config: {
       auth: {
-        strategy: "token"
+        // strategy: "token"
+        mode: "optional"
       }
     },
     handler: async request => {
