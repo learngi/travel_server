@@ -1,18 +1,18 @@
-const knex = require("../knex");
-const config = require("../src/config");
-const generator = require("generate-password");
-const fs = require("fs");
-const _ = require("underscore");
+const knex = require('../knex');
+const config = require('../src/config');
+const generator = require('generate-password');
+const fs = require('fs');
+const _ = require('underscore');
 
 const academics = [
   // get All Colleges, Courses, Branches, Year, Subjects, Sections
   {
-    path: "/getAllData",
-    method: "GET",
+    path: '/getAllData',
+    method: 'GET',
     config: {
       auth: {
         // strategy: "token"
-        mode: "optional"
+        mode: 'optional'
       }
     },
     handler: async request => {
@@ -35,10 +35,10 @@ const academics = [
           if (!data) {
             reply = {
               success: false,
-              message: "No data is available"
+              message: 'No data is available'
             };
           } else {
-            allCoursesdata = _.pluck(data, "id");
+            allCoursesdata = _.pluck(data, 'id');
             // reply= {l:data,b: allCoursesdata}
             // return reply;
 
@@ -53,13 +53,13 @@ const academics = [
               };
             });
             // console.log("collegedata", collegeData);
-            coursesData["courses"] = [];
-            branchesData["branches"] = [];
-            yearData["years"] = [];
-            semesterData["semester"] = [];
-            subjectsData["subjects"] = [];
-            sectionsData["sections"] = [];
-            departmentData["departments"] = [];
+            coursesData['courses'] = [];
+            branchesData['branches'] = [];
+            yearData['years'] = [];
+            semesterData['semester'] = [];
+            subjectsData['subjects'] = [];
+            sectionsData['sections'] = [];
+            departmentData['departments'] = [];
             await knex
               .raw(
                 `select c.id as course_id, c.course, c.college, c.fullname from raghuerp_db.courses c where c.status = 1`
@@ -68,21 +68,21 @@ const academics = [
                 if (!res) {
                   reply = {
                     success: false,
-                    message: "No courses data is available"
+                    message: 'No courses data is available'
                   };
                 } else {
                   allCoursesdata = res;
                   const clgData = Object.keys(collegeData);
                   for (let i = 0; i < clgData.length; i++) {
-                    collegeData[clgData[i]]["courses"] = {};
+                    collegeData[clgData[i]]['courses'] = {};
                     for (let j = 0; j < res.length; j++) {
                       console.log(
-                        "id",
+                        'id',
                         collegeData[clgData[i]].id,
                         res[j].college
                       );
                       if (res[j].college === collegeData[clgData[i]].id) {
-                        collegeData[clgData[i]]["courses"][res[j].course_id] = {
+                        collegeData[clgData[i]]['courses'][res[j].course_id] = {
                           course_id: res[j].course_id,
                           course_name: res[j].course,
                           college_id: res[j].college
@@ -98,17 +98,17 @@ const academics = [
                       if (!res1) {
                         reply = {
                           success: false,
-                          message: "No branches data is available"
+                          message: 'No branches data is available'
                         };
                       } else {
-                        console.log("collegeDta", clgData);
+                        console.log('collegeDta', clgData);
                         for (let i = 0; i < clgData.length; i++) {
                           const couData = Object.keys(
                             collegeData[clgData[i]].courses
                           );
                           for (let j = 0; j < couData.length; j++) {
                             collegeData[clgData[i]].courses[couData[j]][
-                              "branches"
+                              'branches'
                             ] = {};
                             for (let k = 0; k < res1.length; k++) {
                               if (
@@ -116,7 +116,7 @@ const academics = [
                                   .course_id === res1[k].course
                               ) {
                                 collegeData[clgData[i]].courses[couData[j]][
-                                  "branches"
+                                  'branches'
                                 ][res1[k].id] = {
                                   branch_id: res1[k].id,
                                   branch_name: res1[k].branch,
@@ -135,7 +135,7 @@ const academics = [
                             if (!yearRes) {
                               reply = {
                                 success: false,
-                                message: "No year data is available"
+                                message: 'No year data is available'
                               };
                             } else {
                               for (let i = 0; i < clgData.length; i++) {
@@ -150,7 +150,7 @@ const academics = [
                                   for (let k = 0; k < branData.length; k++) {
                                     collegeData[clgData[i]].courses[
                                       couData[j]
-                                    ].branches[branData[k]]["years"] = {};
+                                    ].branches[branData[k]]['years'] = {};
                                     for (let m = 0; m < yearRes.length; m++) {
                                       if (
                                         yearRes[m].branch_id ===
@@ -160,7 +160,7 @@ const academics = [
                                       ) {
                                         collegeData[clgData[i]].courses[
                                           couData[j]
-                                        ].branches[branData[k]]["years"][
+                                        ].branches[branData[k]]['years'][
                                           yearRes[m].year_id
                                         ] = {
                                           year_id: yearRes[m].year_id,
@@ -181,7 +181,7 @@ const academics = [
                                 if (!semRes) {
                                   reply = {
                                     success: false,
-                                    message: "No semester data is available"
+                                    message: 'No semester data is available'
                                   };
                                 } else {
                                   // console.log("semres", semRes);
@@ -216,7 +216,7 @@ const academics = [
                                             couData[j]
                                           ].branches[branData[k]].years[
                                             yeData[m]
-                                          ]["semester"] = {};
+                                          ]['semester'] = {};
                                           for (
                                             let n = 0;
                                             n < semRes.length;
@@ -234,8 +234,8 @@ const academics = [
                                                 couData[j]
                                               ].branches[branData[k]].years[
                                                 yeData[m]
-                                              ]["semester"][
-                                                semRes[n].semister
+                                              ]['semester'][
+                                                semRes[n].sem_id
                                               ] = {
                                                 semester: semRes[n].semister,
                                                 sem_id: semRes[n].sem_id,
@@ -256,7 +256,7 @@ const academics = [
                                     if (!secRes) {
                                       reply = {
                                         success: false,
-                                        message: "No sections data is available"
+                                        message: 'No sections data is available'
                                       };
                                     } else {
                                       for (let i = 0; i < clgData.length; i++) {
@@ -292,7 +292,7 @@ const academics = [
                                                 couData[j]
                                               ].branches[branData[k]].years[
                                                 yeData[m]
-                                              ]["sections"] = {};
+                                              ]['sections'] = {};
                                               for (
                                                 let n = 0;
                                                 n < secRes.length;
@@ -312,7 +312,9 @@ const academics = [
                                                     couData[j]
                                                   ].branches[branData[k]].years[
                                                     yeData[m]
-                                                  ]["sections"] = {
+                                                  ]['sections'][
+                                                    secRes[n].section_id
+                                                  ] = {
                                                     section_id:
                                                       secRes[n].section_id,
                                                     section: secRes[n].section,
@@ -344,7 +346,7 @@ const academics = [
                                           reply = {
                                             success: false,
                                             message:
-                                              "No depatments data is available"
+                                              'No depatments data is available'
                                           };
                                         } else {
                                           for (
@@ -362,7 +364,7 @@ const academics = [
                                                 deptRes[j].college_id
                                               ) {
                                                 departmentData[
-                                                  "departments"
+                                                  'departments'
                                                 ].push({
                                                   dept_id: deptRes[j].dept_id,
                                                   department:
@@ -374,9 +376,9 @@ const academics = [
                                                 });
                                               }
                                             }
-                                            collegeData[i]["departments"] =
-                                              departmentData["departments"];
-                                            departmentData["departments"] = [];
+                                            collegeData[i]['departments'] =
+                                              departmentData['departments'];
+                                            departmentData['departments'] = [];
                                           }
                                         }
                                       });
@@ -389,10 +391,10 @@ const academics = [
                                           reply = {
                                             success: false,
                                             message:
-                                              "No subjects data is available"
+                                              'No subjects data is available'
                                           };
                                         } else {
-                                          console.log("subRes", subRes);
+                                          console.log('subRes', subRes);
                                           for (
                                             let i = 0;
                                             i < clgData.length;
@@ -433,7 +435,7 @@ const academics = [
                                                       .years[yeData[m]].semester
                                                   );
                                                   console.log(
-                                                    "semData",
+                                                    'semData',
                                                     semData
                                                   );
                                                   for (
@@ -449,7 +451,7 @@ const academics = [
                                                       branData[k]
                                                     ].years[yeData[m]].semester[
                                                       semData[n]
-                                                    ]["subjects"] = {};
+                                                    ]['subjects'] = {};
                                                     for (
                                                       let p = 0;
                                                       p < subRes.length;
@@ -482,7 +484,7 @@ const academics = [
                                                             yeData[m]
                                                           ].semester[
                                                             semData[n]
-                                                          ]["subjects"][
+                                                          ]['subjects'][
                                                             subRes[p].id
                                                           ] = {
                                                             subject_id:
@@ -508,28 +510,94 @@ const academics = [
                                       });
                                   });
                               });
-                          }); 
+                          });
                       }
                     });
                 }
               })
               .catch(err => {
                 if (err) {
-                  console.log("err", err);
+                  console.log('err', err);
                 }
               });
             reply = {
               success: true,
-              colleges: _.indexBy(collegeData, "id")
+              colleges: _.indexBy(collegeData, 'id')
             };
           }
         })
         .catch(err => {
           if (err) {
-            console.log("err", err);
+            console.log('err', err);
           }
         });
       return reply;
+    }
+  },
+
+  {
+    method: 'POST',
+    path: '/uploadAcademics',
+    config: {
+      auth: {
+        mode: 'optional'
+      },
+      payload: {
+        output: 'stream',
+        maxBytes: 10048576,
+        parse: true,
+        allow: 'multipart/form-data',
+        timeout: 110000
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+      const data = request.payload;
+      const input = request.payload.data;
+      console.log('input', input);
+      // const documents = request.payload.fileUpload0.hapi;
+      // console.log('payload', documents);
+
+      if (data) {
+        for (let i = 0; i < data.ct; i++) {
+          const fileName = request.payload[`fileUpload${i}`].hapi.filename;
+          const path = config.upload_Documents + fileName;
+          const file = fs.createWriteStream(path);
+          file.on('error', err => {
+            console.log('ff', err);
+          });
+          request.payload[`fileUpload${i}`].pipe(file);
+        }
+      }
+
+      return res;
+    }
+  },
+  {
+    method: 'GET',
+    path: '/getsubject',
+    config: {
+      auth: {
+        mode: 'optional'
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+      let reg_no = request.params;
+      const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable t
+      INNER JOIN subjects sub on t.sub_id = sub.id 
+      WHERE t.reg_no = 'rit0110' GROUP BY t.sub_id`;
+      knex.raw(q).then(([data]) => {
+        if (data) {
+          res = {
+            success: true,
+            data: data
+          };
+        }
+      });
+      return res;
     }
   }
 ];
