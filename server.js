@@ -1,37 +1,38 @@
 // import routes from "./src/routes"
 
-import routes from './src/routes';
-import news from './src/news';
-import academics from './src/academics';
-import jwt from 'jsonwebtoken';
-import holidays from './src/holiday';
+import routes from "./src/routes";
+import news from "./src/news";
+import academics from "./src/academics";
+import jwt from "jsonwebtoken";
+import holidays from "./src/holiday";
+import timetable from "./src/timetable";
 
 // import routes from "src/routes";
 
-const Inert = require('inert');
+const Inert = require("inert");
 
-const Hapi = require('hapi');
-const config = require('./src/config');
-const AuthBearer = require('hapi-auth-bearer-token');
+const Hapi = require("hapi");
+const config = require("./src/config");
+const AuthBearer = require("hapi-auth-bearer-token");
 
 const server = Hapi.server({
   port: 5522,
   host: config.host,
-  routes: { cors: { origin: ['*'] } }
+  routes: { cors: { origin: ["*"] } }
 });
 
-process.on('unhandledRejection', err => {
-  console.log('err', err);
+process.on("unhandledRejection", err => {
+  console.log("err", err);
   process.exit(1);
 });
 
 init();
 
 async function init() {
-  console.log('testing');
+  console.log("testing");
   await server.register([AuthBearer, Inert]);
 
-  await server.auth.strategy('token', 'bearer-access-token', {
+  await server.auth.strategy("token", "bearer-access-token", {
     validate: async (request, token) => {
       let isValid;
       let credentials = {};
@@ -47,9 +48,15 @@ async function init() {
     }
   });
 
-  server.auth.default('token');
+  server.auth.default("token");
 
-  const allRoutes = [...routes, ...news, ...academics, ...holidays];
+  const allRoutes = [
+    ...routes,
+    ...news,
+    ...academics,
+    ...holidays,
+    ...timetable
+  ];
   allRoutes.forEach(item => {
     server.route(item);
   });
@@ -67,5 +74,5 @@ async function start() {
     process.exit(1);
   }
 
-  console.log('Server running at:', server.info.uri);
+  console.log("Server running at:", server.info.uri);
 }
