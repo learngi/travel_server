@@ -537,7 +537,7 @@ const academics = [
 
   {
     method: 'POST',
-    path: '/uploadAcademics',
+    path: '/uploadDocuments',
     config: {
       auth: {
         mode: 'optional'
@@ -554,14 +554,16 @@ const academics = [
     handler: async request => {
       let res = null;
       const data = request.payload;
-      const input = request.payload.data;
-      console.log('input', input);
+      let sub_id = request.payload.sub_id;
+      const documents = [];
+      const subjectArray = [];
       // const documents = request.payload.fileUpload0.hapi;
       // console.log('payload', documents);
 
       if (data) {
         for (let i = 0; i < data.ct; i++) {
           const fileName = request.payload[`fileUpload${i}`].hapi.filename;
+          documents.push({ filename: fileName });
           const path = config.upload_Documents + fileName;
           const file = fs.createWriteStream(path);
           file.on('error', err => {
@@ -570,13 +572,29 @@ const academics = [
           request.payload[`fileUpload${i}`].pipe(file);
         }
       }
-
+      documents.forEach(item => {
+        subjectArray.push({
+          filename: item.filename,
+          sub_id
+        });
+      });
+      console.log('d', subjectArray);
+      await knex('academics')
+        .insert(subjectArray)
+        .then(([data]) => {
+          if (data) {
+            res = {
+              success: true,
+              message: 'Success'
+            };
+          }
+        });
       return res;
     }
   },
   {
     method: 'GET',
-    path: '/getsubject',
+    path: '/getsubject/{reg_no}',
     config: {
       auth: {
         mode: 'optional'
@@ -585,11 +603,14 @@ const academics = [
 
     handler: async request => {
       let res = null;
-      let reg_no = request.params;
-      const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable t
-      INNER JOIN subjects sub on t.sub_id = sub.id 
-      WHERE t.reg_no = 'rit0110' GROUP BY t.sub_id`;
-      knex.raw(q).then(([data]) => {
+      let { reg_no } = request.params;
+
+      console.log('in', reg_no);
+      const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
+      INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
+      WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+      console.log('query', q);
+      await knex.raw(q).then(([data]) => {
         if (data) {
           res = {
             success: true,
@@ -597,6 +618,7 @@ const academics = [
           };
         }
       });
+
       return res;
     }
   }
