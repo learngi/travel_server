@@ -252,7 +252,7 @@ const news = [
       const input = [];
       const { id } = request.params;
       const path = config.database.host + ":" + config.server.port;
-      console.log(path);
+      console.log(id, path);
       // if(request.pa)
       await knex
         .raw(`select id, image, status from carousel`)
@@ -263,7 +263,7 @@ const news = [
               message: "No carousel images are found"
             };
           } else {
-            if (id === 1) {
+            if (id == 1) {
               data.forEach(item => {
                 if (item.status !== 0) {
                   input.push({
@@ -289,6 +289,8 @@ const news = [
               data: input
             };
           }
+        }).catch(err => {
+          console.log('ee', err);
         });
       return reply;
     }
@@ -322,6 +324,8 @@ const news = [
               data
             };
           }
+        }).catch(err => {
+          console.log(err);
         });
       return reply;
     }
