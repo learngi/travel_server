@@ -10,7 +10,6 @@ const news = [
     method: 'GET',
     config: {
       auth: {
-        // strategy: 'token'
         mode: 'optional'
       }
     },
@@ -44,7 +43,6 @@ const news = [
     method: 'GET',
     config: {
       auth: {
-        // strategy: 'token'
         mode: 'optional'
       }
     },
@@ -73,7 +71,6 @@ const news = [
     method: 'POST',
     config: {
       auth: {
-        // strategy: 'token'
         mode: 'optional'
       },
       payload: {
@@ -175,7 +172,6 @@ const news = [
     path: '/carouselUpload',
     config: {
       auth: {
-        // strategy: 'token'
         mode: 'optional'
       },
       payload: {
@@ -234,7 +230,6 @@ const news = [
     method: 'GET',
     config: {
       auth: {
-        // strategy: 'token'
         mode: 'optional'
       }
     },
@@ -330,7 +325,6 @@ const news = [
     method: 'GET',
     config: {
       auth: {
-        // strategy: "token"
         mode: 'optional'
       }
     },
@@ -370,7 +364,6 @@ const news = [
     method: 'GET',
     config: {
       auth: {
-        // strategy: 'token'
         mode: 'optional'
       }
     },
