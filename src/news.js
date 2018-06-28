@@ -193,25 +193,25 @@ const news = [
       const data = request.payload;
       const { status } = request.payload;
       const image = request.payload.image.hapi.filename;
-
-      if (request.payload.image.hapi.filename) {
+      console.log('imaga', image);
+      if (image) {
+        console.log('ff', image);
         const fileName = request.payload.image.hapi.filename;
         const path = config.upload_folder + fileName;
         const file = fs.createWriteStream(path);
-
         // console.log('file', file);
-
         file.on('error', async err => {
           console.log('errr', err);
         });
-
+        data.image.pipe(file);
+        console.log('2');
         await knex('carousel')
           .insert({
             status,
             image
           })
-          .then(([data]) => {
-            console.log('her');
+          .then(data => {
+            console.log('3');
             if (data) {
               res = {
                 success: true,
@@ -222,21 +222,9 @@ const news = [
           .catch(err => {
             console.log('err', err);
           });
-
-        // insert data into database
-        await data.image.pipe(file);
-
-        data.image.on('end', err => {
-          if (err) {
-            res = {
-              success: false,
-              message: `"File upload failed, please try again"`
-            };
-          }
-        });
+        console.log('4');
+        return res;
       }
-      console.log('res121', res);
-      return res;
     }
   },
 

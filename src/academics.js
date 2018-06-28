@@ -661,7 +661,16 @@ const academics = [
       // const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
       // INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id
       // WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
-
+      if (reg_no == 'admin') {
+        const q = `SELECT t.sub_id,clg.college, crs.course,br.branch,yr.year,ys.semister, sub.subject_name FROM raghuerp_timetable.timetable t
+        INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
+        INNER JOIN raghuerp_timetable.year_subject ys on t.year_id = ys.year_id
+        INNER JOIN raghuerp_db.colleges clg on ys.college_id = clg.id
+        INNER JOIN raghuerp_db.courses crs on ys.course_id = crs.id 
+         INNER JOIN raghuerp_db.branches br on ys.branch_id = br.id 
+          INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id 
+         GROUP BY t.sub_id`;
+      }
       const q1 = `SELECT t.sub_id,clg.college, crs.course,br.branch,yr.year,ys.semister, sub.subject_name FROM raghuerp_timetable.timetable t
       INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
       INNER JOIN raghuerp_timetable.year_subject ys on t.year_id = ys.year_id
@@ -731,7 +740,6 @@ const academics = [
       documents.forEach(item => {
         subjectArray.push({
           filename: item.filename,
-
           sub_id
         });
       });

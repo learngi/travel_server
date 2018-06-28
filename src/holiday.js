@@ -113,7 +113,7 @@ const holidays = [
     handler: async request => {
       console.log('abc');
       let res = null;
-      const q = `SELECT al.aid, al.cid,a.title, a.message ,al.read_msg, rc.college FROM announcement a
+      const q = `SELECT al.aid, al.cid,a.title, a.message ,al.read_msg,a.created_at, rc.college FROM announcement a
       INNER JOIN announcement_link al on a.aid = al.aid
             INNER JOIN raghuerp_db.colleges rc on al.cid = rc.id ORDER BY read_msg ASC`;
       await knex.raw(q).then(([data]) => {
