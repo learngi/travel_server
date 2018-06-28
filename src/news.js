@@ -266,7 +266,7 @@ const news = [
                 if (item.status !== 0) {
                   input.push({
                     id: item.id,
-                    image: path + item.image,
+                    image: path + "/" + item.image,
                     status: item.status,
                     image_name: item.image
                   });
