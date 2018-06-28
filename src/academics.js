@@ -557,10 +557,11 @@ const academics = [
       documentFiles = JSON.parse(documentFiles);
       let sub_id = documentFiles[0].sub_id;
       let reg_no = documentFiles[0].reg_no;
-      let id = documentFiles[0].id;
-      console.log('ff', id);
+      // let id = documentFiles
+      console.log('ff');
       for (let i = 0; i < documentFiles.length; i++) {
         const item = documentFiles[i];
+        const id = item.id;
         const insertData = {
           sub_id: sub_id,
           reg_no: reg_no,
@@ -575,7 +576,7 @@ const academics = [
           insertData.filename = request.payload[`fileUpload${i}`].hapi.filename;
         }
 
-        console.log('f', insertData);
+        console.log('f', item.id);
 
         if (id) {
           await knex('academics')
@@ -661,7 +662,7 @@ const academics = [
       // INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id
       // WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
 
-      const q = `SELECT t.sub_id,clg.college, crs.course,br.branch,yr.year,ys.semister, sub.subject_name FROM raghuerp_timetable.timetable t
+      const q1 = `SELECT t.sub_id,clg.college, crs.course,br.branch,yr.year,ys.semister, sub.subject_name FROM raghuerp_timetable.timetable t
       INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
       INNER JOIN raghuerp_timetable.year_subject ys on t.year_id = ys.year_id
       INNER JOIN raghuerp_db.colleges clg on ys.college_id = clg.id
@@ -669,15 +670,21 @@ const academics = [
        INNER JOIN raghuerp_db.branches br on ys.branch_id = br.id 
         INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id 
       WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
-      console.log('query', q);
-      await knex.raw(q).then(([data]) => {
-        if (data) {
-          res = {
-            success: true,
-            data: data
-          };
-        }
-      });
+      console.log('query', q1);
+      await knex
+        .raw(q1)
+        .then(([result]) => {
+          console.log('d', result);
+          if (result) {
+            res = {
+              success: true,
+              data: result
+            };
+          }
+        })
+        .catch(err => {
+          console.log('ee', err);
+        });
 
       return res;
     }
