@@ -1,32 +1,32 @@
 // import knex from "../src/config/knex";
 // import config from "../config";
 
-const knex = require("../knex");
-const config = require("../src/config");
-const jwt = require("jsonwebtoken");
-const fs = require("fs");
+const knex = require('../knex');
+const config = require('../src/config');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
-const bcrypt = require("bcrypt");
-const md5 = require("md5");
+const bcrypt = require('bcrypt');
+const md5 = require('md5');
 
-const moment = require("moment");
+const moment = require('moment');
 
 const routes = [
   // example code
   {
-    path: "/test",
-    method: "POST",
+    path: '/test',
+    method: 'POST',
     config: {
       auth: {
-        mode: "optional"
+        mode: 'optional'
       }
     },
     handler: async request => {
       let reply = null;
-      console.log("HELLO WORLD");
+      console.log('HELLO WORLD');
       reply = {
         success: true,
-        message: "hello world"
+        message: 'hello world'
       };
       return reply;
     }
@@ -34,18 +34,18 @@ const routes = [
 
   // Authentication api
   {
-    path: "/auth",
-    method: "POST",
+    path: '/auth',
+    method: 'POST',
     config: {
       auth: {
-        mode: "optional"
+        mode: 'optional'
       }
     },
     handler: async request => {
       let reply = null;
       let userData;
       let token;
-      console.log("request payload", request.payload);
+      console.log('request payload', request.payload);
       let { username, password } = request.payload;
       console.log(username, password, md5(password));
       password = md5(password);
@@ -57,7 +57,7 @@ const routes = [
           if (data[0].count) {
             console.log(data[0].utype);
             let p;
-            if (data[0].utype === "stf") {
+            if (data[0].utype === 'stf') {
               p = `select u.reg_no, u.utype, s.firstname, s.role, s.dispname as name, s.designation, s.email, s.mobile, d.full_name as department, d.id as dept_id, c.college, c.id as college_id from raghuerp_db.users u inner join raghuerp_db.staff s on s.reg_no = u.reg_no inner join raghuerp_db.departments d on d.id = s.department inner join raghuerp_db.colleges c on c.id = s.college where u.reg_no = '${username}'`;
             } else {
               p = `select u.reg_no, u.utype, s.firstname,s.email, s.mobile, s.gender, s.college as college_id, c.full_name as college, cour.id as course_id, cour.course, b.id as branch_id, b.branch, y.id as year_id, y.year, sec.id  as section_id, sec.section from raghuerp_db.users u inner join raghuerp_db.students s on s.reg_no = u.reg_no inner join raghuerp_db.colleges c on c.id = s.college inner join raghuerp_db.courses cour on cour.id = s.course inner join raghuerp_db.branches b on b.id = s.branch inner join raghuerp_db.year y on y.id = s.year inner join raghuerp_db.sections sec on s.section = sec.id where s.reg_no = '${username}'`;
@@ -77,13 +77,13 @@ const routes = [
                   role: usercount[0].role,
                   dept_id: usercount[0].dept_id
                 },
-                "vZiYpmTzqXMp8PpYXKwqc9ShQ1UhyAfy",
-                { algorithm: "HS256" }
+                'vZiYpmTzqXMp8PpYXKwqc9ShQ1UhyAfy',
+                { algorithm: 'HS256' }
               );
-              console.log("1");
-              console.log("token", token);
+              console.log('1');
+              console.log('token', token);
             });
-            console.log("2");
+            console.log('2');
           } else {
             reply = {
               success: false
@@ -91,28 +91,28 @@ const routes = [
           }
         })
         .catch(err => {
-          console.log("err", err);
+          console.log('err', err);
         });
       console.log(token);
       reply = {
         success: true,
-        message: "Login successfully",
+        message: 'Login successfully',
         data: userData,
         token
       };
-      console.log("3", reply, token);
+      console.log('3', reply, token);
       return reply;
     }
   },
 
   // get all colleges
   {
-    path: "/getAllColleges",
-    method: "GET",
+    path: '/getAllColleges',
+    method: 'GET',
     config: {
       auth: {
-        // strategy: "token"
-        mode: "optional"
+        //  mode: 'optional'
+        mode: 'optional'
       }
     },
     handler: async request => {
@@ -122,7 +122,7 @@ const routes = [
         if (!data) {
           reply = {
             success: false,
-            message: "No data is available"
+            message: 'No data is available'
           };
         } else {
           reply = {
@@ -137,17 +137,17 @@ const routes = [
 
   // get All Courses
   {
-    path: "/getAllCourses/{college_id}",
-    method: "GET",
+    path: '/getAllCourses/{college_id}',
+    method: 'GET',
     config: {
       auth: {
-        strategy: "token"
+        mode: 'optional'
       }
     },
     handler: async request => {
       let reply = null;
       const { college_id } = request.params;
-      console.log("college_id", college_id);
+      console.log('college_id', college_id);
       await knex
         .raw(
           `select cour.id, cour.course, cour.college as college_id, c.college, cour.fullname from raghuerp_db.courses cour inner join raghuerp_db.colleges c on c.id = cour.college and c.status = 1 where cour.status = 1 and c.id = ${college_id}`
@@ -156,7 +156,7 @@ const routes = [
           if (!data) {
             reply = {
               success: false,
-              message: "No courses data is available"
+              message: 'No courses data is available'
             };
           } else {
             reply = {
@@ -176,11 +176,11 @@ const routes = [
 
   // get All Branches
   {
-    path: "/getAllBranches/{course_id}",
-    method: "GET",
+    path: '/getAllBranches/{course_id}',
+    method: 'GET',
     config: {
       auth: {
-        strategy: "token"
+        mode: 'optional'
       }
     },
     handler: async request => {
@@ -194,7 +194,7 @@ const routes = [
           if (!data) {
             reply = {
               success: false,
-              message: "No department data is available"
+              message: 'No department data is available'
             };
           } else {
             reply = {
@@ -209,11 +209,11 @@ const routes = [
 
   // get All years
   {
-    path: "/getAllYears/{branch_id}",
-    method: "GET",
+    path: '/getAllYears/{branch_id}',
+    method: 'GET',
     config: {
       auth: {
-        strategy: "token"
+        mode: 'optional'
       }
     },
     handler: async request => {
@@ -227,7 +227,7 @@ const routes = [
           if (!data) {
             reply = {
               success: false,
-              message: "No years data is available"
+              message: 'No years data is available'
             };
           } else {
             reply = {
@@ -242,15 +242,16 @@ const routes = [
 
   // get All Sections
   {
-    path: "/getAllSections/{year_id}",
-    method: "GET",
+    path: '/getAllSections/{year_id}',
+    method: 'GET',
     config: {
       auth: {
-        strategy: "token"
+        //  mode: 'optional'
+        mode: 'optional'
       }
     },
     handler: async request => {
-      console.log("testfsdafasfsadfing");
+      console.log('testfsdafasfsadfing');
       let reply = null;
       const { year_id } = request.params;
       await knex
@@ -261,7 +262,7 @@ const routes = [
           if (!data) {
             reply = {
               success: false,
-              message: "No section data is available"
+              message: 'No section data is available'
             };
           } else {
             reply = {
@@ -279,11 +280,11 @@ const routes = [
 
   // get ALL semesters
   {
-    path: "/getAllSemesters/{year_id}",
-    method: "GET",
+    path: '/getAllSemesters/{year_id}',
+    method: 'GET',
     config: {
       auth: {
-        strategy: "token"
+        mode: 'optional'
       }
     },
     handler: async request => {
@@ -298,7 +299,7 @@ const routes = [
           if (!data) {
             reply = {
               success: false,
-              message: "No semester data is available"
+              message: 'No semester data is available'
             };
           } else {
             reply = {
@@ -313,11 +314,11 @@ const routes = [
 
   // get All Subjects
   {
-    path: "/getAllSubjects/{sem_id}",
-    method: "GET",
+    path: '/getAllSubjects/{sem_id}',
+    method: 'GET',
     config: {
       auth: {
-        strategy: "token"
+        mode: 'optional'
       }
     },
     handler: async request => {
@@ -331,7 +332,7 @@ const routes = [
           if (!data) {
             reply = {
               success: false,
-              message: "No subject data is available"
+              message: 'No subject data is available'
             };
           } else {
             reply = {
@@ -341,7 +342,7 @@ const routes = [
           }
         })
         .catch(err => {
-          console.log("err", err);
+          console.log('err', err);
         });
       return reply;
     }
@@ -350,18 +351,18 @@ const routes = [
   // image upload
 
   {
-    method: "POST",
-    path: "/upload",
+    method: 'POST',
+    path: '/upload',
     config: {
       auth: {
-        mode: "optional"
+        mode: 'optional'
       },
 
       payload: {
-        output: "stream",
+        output: 'stream',
         maxBytes: 10048576,
         parse: true,
-        allow: "multipart/form-data",
+        allow: 'multipart/form-data',
         timeout: 110000
       }
     },
@@ -386,7 +387,7 @@ const routes = [
         if (!extension) {
           res = {
             success: false,
-            error: "Image"
+            error: 'Image'
           };
         }
         input.image = fileName;
@@ -394,17 +395,17 @@ const routes = [
         const path = config.upload_folder + fileName;
         const file = fs.createWriteStream(path);
 
-        file.on("error", err => {
+        file.on('error', err => {
           console.log(err);
         });
 
         data.file.pipe(file);
 
-        data.file.on("end", err => {
+        data.file.on('end', err => {
           if (err) {
             res = {
               success: false,
-              message: "File upload failed, please try again"
+              message: 'File upload failed, please try again'
             };
           }
         });
@@ -416,11 +417,11 @@ const routes = [
 
   // get Images
   {
-    path: "/image/{image}",
-    method: "GET",
+    path: '/image/{image}',
+    method: 'GET',
     config: {
       auth: {
-        mode: "optional"
+        mode: 'optional'
       }
     },
     handler: async (request, h) =>
