@@ -553,8 +553,157 @@ const academics = [
 
     handler: async request => {
       let res = null;
+      let { documentFiles } = request.payload;
+      documentFiles = JSON.parse(documentFiles);
+      let sub_id = documentFiles[0].sub_id;
+      let reg_no = documentFiles[0].reg_no;
+      let id = documentFiles[0].id;
+      console.log('ff', id);
+      for (let i = 0; i < documentFiles.length; i++) {
+        const item = documentFiles[i];
+        const insertData = {
+          sub_id: sub_id,
+          reg_no: reg_no,
+          title: item.title,
+          id: item.id
+        };
+        if (
+          request.payload[`fileUpload${i}`] &&
+          request.payload[`fileUpload${i}`].hapi &&
+          request.payload[`fileUpload${i}`].hapi.filename
+        ) {
+          insertData.filename = request.payload[`fileUpload${i}`].hapi.filename;
+        }
+
+        console.log('f', insertData);
+
+        if (id) {
+          await knex('academics')
+            .where({ id })
+            .update(insertData)
+            .then(data => {
+              if (data) {
+                // upload image
+                if (
+                  request.payload[`fileUpload${i}`] &&
+                  request.payload[`fileUpload${i}`].hapi &&
+                  request.payload[`fileUpload${i}`].hapi.filename
+                ) {
+                  const path =
+                    config.upload_Documents +
+                    request.payload[`fileUpload${i}`].hapi.filename;
+                  request.payload[`fileUpload${i}`].pipe(
+                    fs.createWriteStream(path)
+                  );
+                }
+                res = {
+                  success: true,
+                  message: 'Success'
+                };
+              }
+            })
+            .catch(err => {
+              if (err) {
+                console.log('err', err);
+              }
+            });
+        } else {
+          await knex('academics')
+            .insert(insertData)
+            .then(data => {
+              if (data) {
+                // upload image
+                if (
+                  request.payload[`fileUpload${i}`] &&
+                  request.payload[`fileUpload${i}`].hapi &&
+                  request.payload[`fileUpload${i}`].hapi.filename
+                ) {
+                  const path =
+                    config.upload_Documents +
+                    request.payload[`fileUpload${i}`].hapi.filename;
+                  request.payload[`fileUpload${i}`].pipe(
+                    fs.createWriteStream(path)
+                  );
+                }
+                res = {
+                  success: true,
+                  message: 'Success'
+                };
+              }
+            })
+            .catch(err => {
+              if (err) {
+                console.log('err', err);
+              }
+            });
+        }
+      }
+
+      // console.log('d', subjectArray);
+      return res;
+    }
+  },
+  {
+    method: 'GET',
+    path: '/getsubject/{reg_no}',
+    config: {
+      auth: {
+        mode: 'optional'
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+      let { reg_no } = request.params;
+
+      console.log('in', reg_no);
+      // const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
+      // INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id
+      // WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+
+      const q = `SELECT t.sub_id,clg.college, crs.course,br.branch,yr.year,ys.semister, sub.subject_name FROM raghuerp_timetable.timetable t
+      INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
+      INNER JOIN raghuerp_timetable.year_subject ys on t.year_id = ys.year_id
+      INNER JOIN raghuerp_db.colleges clg on ys.college_id = clg.id
+      INNER JOIN raghuerp_db.courses crs on ys.course_id = crs.id 
+       INNER JOIN raghuerp_db.branches br on ys.branch_id = br.id 
+        INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id 
+      WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+      console.log('query', q);
+      await knex.raw(q).then(([data]) => {
+        if (data) {
+          res = {
+            success: true,
+            data: data
+          };
+        }
+      });
+
+      return res;
+    }
+  },
+  // multiple image upload
+  {
+    method: 'POST',
+    path: '/uploadMultiple',
+    config: {
+      auth: {
+        mode: 'optional'
+      },
+      payload: {
+        output: 'stream',
+        maxBytes: 10048576,
+        parse: true,
+        allow: 'multipart/form-data',
+        timeout: 110000
+      }
+    },
+
+    handler: async request => {
+      let res = null;
       const data = request.payload;
-      let sub_id = request.payload.sub_id;
+      let sub_id = JSON.parse(request.payload.sub_id);
+
       const documents = [];
       const subjectArray = [];
       // const documents = request.payload.fileUpload0.hapi;
@@ -575,6 +724,7 @@ const academics = [
       documents.forEach(item => {
         subjectArray.push({
           filename: item.filename,
+
           sub_id
         });
       });
@@ -592,9 +742,10 @@ const academics = [
       return res;
     }
   },
+
   {
     method: 'GET',
-    path: '/getsubject/{reg_no}',
+    path: '/getUploadList/{reg_no}',
     config: {
       auth: {
         mode: 'optional'
@@ -605,10 +756,11 @@ const academics = [
       let res = null;
       let { reg_no } = request.params;
 
-      console.log('in', reg_no);
-      const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
-      INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
-      WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+      // const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
+      // INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id
+      // WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+
+      const q = `SELECT id,title, filename,sub_id FROM academics WHERE reg_no = '${reg_no}'`;
       console.log('query', q);
       await knex.raw(q).then(([data]) => {
         if (data) {
@@ -621,6 +773,53 @@ const academics = [
 
       return res;
     }
+  },
+  // {
+  //   path: '/attachment/{filename}',
+  //   method: 'GET',
+  //   config: {
+  //     auth: {
+  //       mode: 'optional'
+  //     }
+  //   },
+  //   handler: async (request, h) => {
+  //     const { filename } = request.params;
+  //     console.log(request.params);
+  //     const path = config.audit_upload_folder + `${filename}`;
+  //     console.log(path);
+  //     h.file(path);
+  //   }
+  //   //  config.upload_folder + request.params.image
+
+  //   // handler: async (request, reply) => {
+  //   //   const { image } = request.params;
+  //   //   // console.log('image_path', config.upload_folder + image);
+  //   //   // return reply.file(config.upload_folder + image);
+  //   // }
+  // }
+  {
+    path: '/documents/{filename}',
+    method: 'GET',
+    config: {
+      auth: {
+        mode: 'optional'
+      }
+    },
+    handler: async (request, h) =>
+      h.file(config.upload_Documents + request.params.filename)
   }
 ];
+
+function insertOrUpdate(Knex, tableName, data) {
+  const firstData = data[0] ? data[0] : data;
+  return knex.raw(
+    `${knex(tableName)
+      .insert(data)
+      .toQuery()} ON DUPLICATE KEY UPDATE ${Object.getOwnPropertyNames(
+      firstData
+    )
+      .map(field => `${field}=VALUES(${field})`)
+      .join(',')}`
+  );
+}
 export default academics;
