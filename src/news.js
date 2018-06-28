@@ -263,7 +263,7 @@ const news = [
               message: 'No carousel images are found'
             };
           } else {
-            if (id === 1) {
+            if (id == 1) {
               data.forEach(item => {
                 if (item.status !== 0) {
                   input.push({
@@ -289,6 +289,9 @@ const news = [
               data: input
             };
           }
+        })
+        .catch(err => {
+          console.log('ee', err);
         });
       return reply;
     }
@@ -322,6 +325,9 @@ const news = [
               data
             };
           }
+        })
+        .catch(err => {
+          console.log(err);
         });
       return reply;
     }

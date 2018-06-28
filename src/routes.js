@@ -51,44 +51,39 @@ const routes = [
       password = md5(password);
       await knex
         .raw(
-          `select count(*) as count from raghuerp_db.users where reg_no = '${username}' and password = '${password}'`
+          `select count(*) as count, utype from raghuerp_db.users where reg_no = '${username}' and password = '${password}'`
         )
         .then(async ([data]) => {
           if (data[0].count) {
-            await knex
-              .raw(
-                `select u.reg_no, u.utype, s.firstname, s.role, s.dispname as name, s.designation, s.email, s.mobile, d.full_name as department, d.id as dept_id, c.college, c.id as college_id from raghuerp_db.users u inner join raghuerp_db.staff s on s.reg_no = u.reg_no inner join raghuerp_db.departments d on d.id = s.department inner join raghuerp_db.colleges c on c.id = s.college where u.reg_no = '${username}' `
-              )
-              .then(async ([usercount]) => {
-                userData = usercount;
-                console.log(usercount, password, usercount[0].password);
-                // if (usercount.length > 0) {
-                // }
-                token = await jwt.sign(
-                  {
-                    id: usercount[0].id,
-                    reg_no: usercount[0].reg_no,
-                    success: 'true',
-                    token,
-                    name: usercount[0].name,
-                    email: usercount[0].email,
-                    mobile: usercount[0].mobile,
-                    role: usercount[0].role,
-                    dept_id: usercount[0].dept_id
-                  },
-                  'vZiYpmTzqXMp8PpYXKwqc9ShQ1UhyAfy',
-                  { algorithm: 'HS256' }
-                );
-                console.log('1');
-                console.log('token', token);
-              });
+            console.log(data[0].utype);
+            let p;
+            if (data[0].utype === 'stf') {
+              p = `select u.reg_no, u.utype, s.firstname, s.role, s.dispname as name, s.designation, s.email, s.mobile, d.full_name as department, d.id as dept_id, c.college, c.id as college_id from raghuerp_db.users u inner join raghuerp_db.staff s on s.reg_no = u.reg_no inner join raghuerp_db.departments d on d.id = s.department inner join raghuerp_db.colleges c on c.id = s.college where u.reg_no = '${username}'`;
+            } else {
+              p = `select u.reg_no, u.utype, s.firstname,s.email, s.mobile, s.gender, s.college as college_id, c.full_name as college, cour.id as course_id, cour.course, b.id as branch_id, b.branch, y.id as year_id, y.year, sec.id  as section_id, sec.section from raghuerp_db.users u inner join raghuerp_db.students s on s.reg_no = u.reg_no inner join raghuerp_db.colleges c on c.id = s.college inner join raghuerp_db.courses cour on cour.id = s.course inner join raghuerp_db.branches b on b.id = s.branch inner join raghuerp_db.year y on y.id = s.year inner join raghuerp_db.sections sec on s.section = sec.id where s.reg_no = '${username}'`;
+            }
+            await knex.raw(p).then(async ([usercount]) => {
+              userData = usercount;
+              console.log(usercount, password, usercount[0].password);
+              // if (usercount.length > 0) {
+              // }
+              token = jwt.sign(
+                {
+                  id: usercount[0].id,
+                  reg_no: usercount[0].reg_no,
+                  name: usercount[0].name,
+                  email: usercount[0].email,
+                  mobile: usercount[0].mobile,
+                  role: usercount[0].role,
+                  dept_id: usercount[0].dept_id
+                },
+                'vZiYpmTzqXMp8PpYXKwqc9ShQ1UhyAfy',
+                { algorithm: 'HS256' }
+              );
+              console.log('1');
+              console.log('token', token);
+            });
             console.log('2');
-            reply = {
-              success: true,
-              message: 'Login succefully',
-              data: userData,
-              token
-            };
           } else {
             reply = {
               success: false
@@ -98,7 +93,14 @@ const routes = [
         .catch(err => {
           console.log('err', err);
         });
-      console.log('3', reply);
+      console.log(token);
+      reply = {
+        success: true,
+        message: 'Login successfully',
+        data: userData,
+        token
+      };
+      console.log('3', reply, token);
       return reply;
     }
   },
