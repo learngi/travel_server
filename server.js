@@ -6,6 +6,7 @@ import academics from "./src/academics";
 import jwt from "jsonwebtoken";
 import holidays from "./src/holiday";
 import timetable from "./src/timetable";
+import feedback from "./src/feedback";
 
 // import routes from "src/routes";
 
@@ -55,7 +56,8 @@ async function init() {
     ...news,
     ...academics,
     ...holidays,
-    ...timetable
+    ...timetable,
+    ...feedback
   ];
   allRoutes.forEach(item => {
     server.route(item);

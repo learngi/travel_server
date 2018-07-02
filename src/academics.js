@@ -555,16 +555,16 @@ const academics = [
       let res = null;
       let { documentFiles } = request.payload;
       documentFiles = JSON.parse(documentFiles);
-      let sub_id = documentFiles[0].sub_id;
-      let reg_no = documentFiles[0].reg_no;
+      const sub_id = documentFiles[0].sub_id;
+      const reg_no = documentFiles[0].reg_no;
       // let id = documentFiles
       console.log('ff');
       for (let i = 0; i < documentFiles.length; i++) {
         const item = documentFiles[i];
         const id = item.id;
         const insertData = {
-          sub_id: sub_id,
-          reg_no: reg_no,
+          sub_id,
+          reg_no,
           title: item.title,
           id: item.id
         };
@@ -728,7 +728,7 @@ const academics = [
     handler: async request => {
       let res = null;
       const data = request.payload;
-      let sub_id = JSON.parse(request.payload.sub_id);
+      const sub_id = JSON.parse(request.payload.sub_id);
 
       const documents = [];
       const subjectArray = [];
@@ -779,7 +779,7 @@ const academics = [
 
     handler: async request => {
       let res = null;
-      let { reg_no } = request.params;
+      const { reg_no } = request.params;
 
       // const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
       // INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id
@@ -791,7 +791,7 @@ const academics = [
         if (data) {
           res = {
             success: true,
-            data: data
+            data
           };
         }
       });
