@@ -680,12 +680,13 @@ const academics = [
         //   INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id
         // WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
         q = `SELECT t.sub_id,clg.college,clg.id as cid, crs.course, crs.id as course_id, br.branch, br.id as branch_id,yr.year, yr.id as year_id,ys.semister, ys.id as semester_id, sub.subject_name FROM raghuerp_timetable.timetable t
-        INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id 
+        INNER JOIN raghuerp_timetable.subj_sems ss on t.sub_id = ss.id        
+        INNER JOIN  raghuerp_timetable.subjects sub on ss.subject_id = sub.id 
         INNER JOIN raghuerp_timetable.year_subject ys on t.year_id = ys.year_id
         INNER JOIN raghuerp_db.colleges clg on ys.college_id = clg.id
         INNER JOIN raghuerp_db.courses crs on ys.course_id = crs.id 
-         INNER JOIN raghuerp_db.branches br on ys.branch_id = br.id 
-          INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id 
+        INNER JOIN raghuerp_db.branches br on ys.branch_id = br.id 
+        INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id 
         WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
       }
 
@@ -799,6 +800,49 @@ const academics = [
       return res;
     }
   },
+
+  // get academic by sub id
+
+  {
+    method: 'GET',
+    path: '/getAcademics/{sub_id}',
+    config: {
+      auth: {
+        mode: 'optional'
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+      const { sub_id } = request.params;
+      const path = config.database.host + ':' + config.server.port;
+      const inputdata = [];
+      // const q = `SELECT t.sub_id, sub.subject_name FROM raghuerp_timetable.timetable t
+      // INNER JOIN  raghuerp_timetable.subjects sub on t.sub_id = sub.id
+      // WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+
+      const q = `SELECT title, filename FROM  academics WHERE sub_id = '${sub_id}'`;
+      console.log('query', q);
+      await knex.raw(q).then(([data]) => {
+        if (data) {
+          data.forEach(item => {
+            inputdata.push({
+              title: item.title,
+              filename: item.filename,
+              path: 'http://' + path + '/documents/' + item.filename
+            });
+          });
+          res = {
+            success: true,
+            data: inputdata
+          };
+        }
+      });
+
+      return res;
+    }
+  },
+
   // {
   //   path: '/attachment/{filename}',
   //   method: 'GET',
