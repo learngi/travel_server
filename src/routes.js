@@ -49,10 +49,10 @@ const routes = [
       let { username, password } = request.payload;
       console.log(username, password, md5(password));
       password = md5(password);
+      const q = `select count(*) as count, utype from raghuerp_db.users where reg_no = '${username}' and password = '${password}'`;
+      console.log('q', q);
       await knex
-        .raw(
-          `select count(*) as count, utype from raghuerp_db.users where reg_no = '${username}' and password = '${password}'`
-        )
+        .raw(q)
         .then(async ([data]) => {
           if (data[0].count) {
             console.log(data[0].utype);
@@ -60,13 +60,14 @@ const routes = [
             if (data[0].utype === 'stf') {
               p = `select u.reg_no, u.utype, s.firstname, s.role, s.dispname as name, s.designation, s.email, s.mobile, d.full_name as department, d.id as dept_id, c.college, c.id as college_id from raghuerp_db.users u inner join raghuerp_db.staff s on s.reg_no = u.reg_no inner join raghuerp_db.departments d on d.id = s.department inner join raghuerp_db.colleges c on c.id = s.college where u.reg_no = '${username}'`;
             } else if (data[0].utype === 'std') {
-              p = `select u.reg_no, u.utype, s.firstname,s.email, s.mobile, s.gender, s.college as college_id, c.full_name as college, cour.id as course_id, cour.course, b.id as branch_id, b.branch, y.id as year_id, y.year, sec.id as section_id, sec.section,ys.id as semester_id, ys.semister as semester from raghuerp_db.users u inner join raghuerp_db.students s on s.reg_no = u.reg_no inner join raghuerp_db.colleges c on c.id = s.college inner join raghuerp_db.courses cour on cour.id = s.course inner join raghuerp_db.branches b on b.id = s.branch inner join raghuerp_db.year y on y.id = s.year inner join raghuerp_db.sections sec on s.section = sec.id inner join raghuerp_timetable.year_subject ys on y.id = ys.year_id where s.reg_no = '${username}'`;
+              console.log('testtt');
+              p = `select u.reg_no, u.utype, s.firstname,s.email,s.admission_date, s.mobile, s.gender, s.college as college_id, c.full_name as college, cour.id as course_id, cour.course, b.id as branch_id, b.branch, y.id as year_id, y.year, sec.id as section_id, sec.section,ys.id as semester_id, ys.semister as semester from raghuerp_db.users u inner join raghuerp_db.students s on s.reg_no = u.reg_no inner join raghuerp_db.colleges c on c.id = s.college inner join raghuerp_db.courses cour on cour.id = s.course inner join raghuerp_db.branches b on b.id = s.branch inner join raghuerp_db.year y on y.id = s.year inner join raghuerp_db.sections sec on s.section = sec.id inner join raghuerp_timetable.year_subject ys on y.id = ys.year_id where s.reg_no = '${username}'`;
             } else {
               p = `select u.name,u.reg_no from raghuerp_db.users u where u.reg_no = '${username}'`;
             }
             await knex.raw(p).then(async ([usercount]) => {
               userData = usercount;
-              console.log(usercount, password, usercount[0].password);
+              console.log(usercount, password);
               // if (usercount.length > 0) {
               // }
               if (data[0].utype === 'adm') {

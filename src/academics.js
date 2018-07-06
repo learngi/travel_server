@@ -687,7 +687,7 @@ const academics = [
         INNER JOIN raghuerp_db.courses crs on ys.course_id = crs.id 
         INNER JOIN raghuerp_db.branches br on ys.branch_id = br.id 
         INNER JOIN raghuerp_db.year yr on ys.year_id = yr.id 
-        WHERE t.reg_no = '${reg_no}' GROUP BY t.sub_id`;
+        WHERE t.reg_no = '${reg_no}' `;
       }
 
       console.log('query', q);
