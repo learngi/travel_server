@@ -12,5 +12,5 @@ module.exports = {
     password: ""
   },
   upload_folder: "./images/",
-  upload_Documents: "G:/clgProject/REI_SERVER/documents/"
+  upload_Documents: "./documents/"
 };

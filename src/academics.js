@@ -5,7 +5,6 @@ const fs = require('fs');
 const _ = require('underscore');
 
 const academics = [
- 
 
   {
     method: 'POST',
@@ -25,10 +24,81 @@ const academics = [
 
     handler: async request => {
       let res = null;
+      let { data } = request.payload;
+      data = JSON.parse(data);
+      // const c_id = documentFiles[0].c_id;
+
+      console.log(data,"data in serevr");
+      
+
+      let dataFeilds = {
+        name: data['c_id'],
+        availability: data['availability'],
+        amount: data['amount'],
+        date: data['date'],
+        depature: data['depature'],
+        depature_time: data['depature_time'],
+        return_time: data['return_time'],
+        no_of_days: data['no_of_days'],
+      };
+
+      await knex('acadamics')
+        .insert(dataFeilds)
+        .then(async ([datas]) => {
+          let insertId = datas.insertId;
+          let VALUES = [];
+
+          for (const row of data.uploadFiles) {
+            if (
+              row.documents &&
+              row.documents.hapi &&
+              row.documents.hapi.filename
+            ) {
+              VALUES.push([insertId, row.day, row.des, row.documents.hapi.filename]);
+              const path =
+                config.upload_Documents +
+                row.documents.hapi.filename;
+              row.documents.pipe(
+                fs.createWriteStream(path)
+              );
+            }
+          }
+
+          await knex.raw(`INSERT INTO acadamics_images(aid, day, description, image) VALUES ?`, [VALUES]).then(async ([insert]) => {
+            res = {
+              success: true,
+              message: 'Success'
+            };
+          })
+
+        })
+      // console.log('d', subjectArray);
+      return res;
+    }
+  },
+
+  {
+    method: 'POST',
+    path: '/uploadDocuments/old',
+    config: {
+      auth: {
+        mode: 'optional'
+      },
+      payload: {
+        output: 'stream',
+        maxBytes: 10048576,
+        parse: true,
+        allow: 'multipart/form-data',
+        timeout: 110000
+      }
+    },
+
+    handler: async request => {
+      let res = null;
       let { documentFiles } = request.payload;
       documentFiles = JSON.parse(documentFiles);
       const c_id = documentFiles[0].c_id;
-        
+
       // let id = documentFiles
       console.log('ff');
       for (let i = 0; i < documentFiles.length; i++) {
@@ -37,7 +107,7 @@ const academics = [
         const insertData = {
           c_id,
           title: item.title,
-          day:item.day,
+          day: item.day,
           id: item.id
         };
         if (
@@ -221,10 +291,10 @@ function insertOrUpdate(Knex, tableName, data) {
     `${knex(tableName)
       .insert(data)
       .toQuery()} ON DUPLICATE KEY UPDATE ${Object.getOwnPropertyNames(
-      firstData
-    )
-      .map(field => `${field}=VALUES(${field})`)
-      .join(',')}`
+        firstData
+      )
+        .map(field => `${field}=VALUES(${field})`)
+        .join(',')}`
   );
 }
 export default academics;
