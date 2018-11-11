@@ -7,10 +7,10 @@ module.exports = {
   database: {
     host: "localhost",
     // host: "172.16.16.101",
-    db: "rei",
+    db: "travel",
     username: "root",
     password: ""
   },
-  upload_folder: "F:/REI/REI_SERVER/images/",
+  upload_folder: "./images/",
   upload_Documents: "G:/clgProject/REI_SERVER/documents/"
 };

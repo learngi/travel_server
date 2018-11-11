@@ -1,27 +1,27 @@
-const knex = require('../knex');
-const config = require('../src/config');
-const generator = require('generate-password');
-const fs = require('fs');
+const knex = require("../knex");
+const config = require("../src/config");
+const generator = require("generate-password");
+const fs = require("fs");
 
 const news = [
   // get All Categories
   {
-    path: '/getCategory',
-    method: 'GET',
+    path: "/getCategory",
+    method: "GET",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
       let reply = null;
       await knex
-        .raw(`select * from news_category where status = 1`)
+        .raw(`select * from categories `)
         .then(([data]) => {
           if (!data) {
             reply = {
               success: false,
-              message: 'No category data is available'
+              message: "No category data is available"
             };
           } else {
             reply = {
@@ -31,194 +31,70 @@ const news = [
           }
         })
         .catch(err => {
-          console.log('err', err);
+          console.log("err", err);
         });
       return reply;
     }
   },
 
-  // get All Tags
-  {
-    path: '/getTags',
-    method: 'GET',
-    config: {
-      auth: {
-        mode: 'optional'
-      }
-    },
-    handler: async request => {
-      let reply = null;
-      await knex.raw(`select * from tags where status = 1`).then(([data]) => {
-        if (!data) {
-          reply = {
-            success: false,
-            message: 'No tags data is available'
-          };
-        } else {
-          reply = {
-            success: true,
-            data
-          };
-        }
-      });
-      return reply;
-    }
-  },
 
-  // insert news
-  {
-    path: '/insertNews',
-    method: 'POST',
-    config: {
-      auth: {
-        mode: 'optional'
-      },
-      payload: {
-        output: 'stream',
-        maxBytes: 1000048576,
-        parse: true,
-        allow: 'multipart/form-data',
-        timeout: 110000
-      }
-    },
-    handler: async request => {
-      let reply = null;
-      let newsdata = [];
-      let image;
-      let news_id;
-      const categoryData = [];
-      const tagData = [];
-      const { dt } = request.payload;
-      console.log(request.payload.date);
-      const translateData = JSON.parse(request.payload.date.data);
-      const { id, title, description, status } = translateData;
-      console.log('date', request.payload);
-      //   console.log("data", request.payload.data);
-      console.log('image', request.payload.image);
-      if (request.payload.image.hapi !== undefined) {
-        image = request.payload.image.hapi.filename;
-      } else {
-        image = request.payload.image;
-      }
-      console.log('image', image);
-
-      if (request.payload.image.hapi !== undefined) {
-        const path = config.upload_folder + request.payload.image.hapi.filename;
-        const ret = request.payload.image.pipe(fs.createWriteStream(path));
-      }
-      newsdata = {
-        id,
-        title,
-        description,
-        dt,
-        status,
-        image_path: image
-      };
-      await knex.transaction(async t => {
-        try {
-          console.log('newsdata', newsdata);
-          await insertOrUpdate(t, 'news', newsdata)
-            .then(([data]) => {
-              if (data) {
-                if (data.insertId === 0) {
-                  news_id = id;
-                } else {
-                  news_id = data.insertId;
-                }
-              }
-            })
-            .catch(err => {
-              console.log('err', err);
-            });
-
-          translateData.category_id.forEach(item => {
-            categoryData.push({
-              cid: item.id,
-              news_id
-            });
-          });
-          console.log('categoryData', categoryData);
-          await insertOrUpdate(t, 'news_categories', categoryData);
-
-          translateData.tag_id.forEach(item => {
-            tagData.push({
-              tag_id: item.id,
-              news_id
-            });
-          });
-          console.log('tagsdata', tagData);
-          await insertOrUpdate(t, 'news_tags', tagData);
-
-          await t.commit();
-          reply = {
-            success: true
-          };
-        } catch (err) {
-          await t.rollback();
-          error = true;
-          message = 'ERROR';
-          reply = {
-            success: false
-          };
-        }
-      });
-      return reply;
-    }
-  },
 
   // carousel upload
   {
-    method: 'POST',
-    path: '/carouselUpload',
+    method: "POST",
+    path: "/carouselUpload",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       },
       payload: {
-        output: 'stream',
+        output: "stream",
         maxBytes: 10048576,
         parse: true,
-        allow: 'multipart/form-data',
+        allow: "multipart/form-data",
         timeout: 110000
       }
     },
 
     handler: async request => {
-      console.log('carousel Upload');
+      console.log("carousel Upload");
       let res = null;
       const data = request.payload;
-      const { status } = request.payload;
+      const { status, type, place_name } = request.payload;
+
       const image = request.payload.image.hapi.filename;
-      console.log('imaga', image);
+      console.log("imaga", image);
       if (image) {
-        console.log('ff', image);
+        console.log("ff", image);
         const fileName = request.payload.image.hapi.filename;
         const path = config.upload_folder + fileName;
         const file = fs.createWriteStream(path);
         // console.log('file', file);
-        file.on('error', async err => {
-          console.log('errr', err);
+        file.on("error", async err => {
+          console.log("errr", err);
         });
         data.image.pipe(file);
-        console.log('2');
-        await knex('carousel')
+        console.log("2");
+        await knex("carousel")
           .insert({
             status,
+            type,
+            place_name,
             image
           })
           .then(data => {
-            console.log('3');
+            console.log("3");
             if (data) {
               res = {
                 success: true,
-                message: 'upload successfully'
+                message: "upload successfully"
               };
             }
           })
           .catch(err => {
-            console.log('err', err);
+            console.log("err", err);
           });
-        console.log('4');
+        console.log("4");
         return res;
       }
     }
@@ -226,27 +102,27 @@ const news = [
 
   // get Images list (carousel)
   {
-    path: '/carousel/{id}',
-    method: 'GET',
+    path: "/carousel/{id}",
+    method: "GET",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
       let reply = null;
       const input = [];
       const { id } = request.params;
-      const path = config.database.host + ':' + config.server.port;
+      const path = config.database.host + ":" + config.server.port;
       console.log(path);
       // if(request.pa)
       await knex
-        .raw(`select id, image, status from carousel`)
+        .raw(`select id, image,place_name,type, status from carousel`)
         .then(([data]) => {
           if (!data) {
             reply = {
               success: false,
-              message: 'No carousel images are found'
+              message: "No carousel images are found"
             };
           } else {
             if (id == 1) {
@@ -254,7 +130,9 @@ const news = [
                 if (item.status !== 0) {
                   input.push({
                     id: item.id,
-                    image: 'http://' + path + '/image/' + item.image,
+                    place_name: item.place_name,
+                    type: item.type,
+                    image: "http://" + path + "/image/" + item.image,
                     status: item.status,
                     image_name: item.image
                   });
@@ -264,7 +142,9 @@ const news = [
               data.forEach(item => {
                 input.push({
                   id: item.id,
-                  image: 'http://' + path + '/image/' + item.image,
+                  place_name: item.place_name,
+                  type: item.type,
+                  image: "http://" + path + "/image/" + item.image,
                   status: item.status,
                   image_name: item.image
                 });
@@ -277,7 +157,7 @@ const news = [
           }
         })
         .catch(err => {
-          console.log('ee', err);
+          console.log("ee", err);
         });
       return reply;
     }
@@ -285,11 +165,11 @@ const news = [
 
   // EDIT IMAGES (CAROUSEL)
   {
-    path: '/editCarousel',
-    method: 'POST',
+    path: "/editCarousel",
+    method: "POST",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
@@ -321,31 +201,28 @@ const news = [
 
   // get Original news list
   {
-    path: '/news',
-    method: 'GET',
+    path: "/news",
+    method: "GET",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
       let reply = null;
-      const path =
-        'http://www.raghueducational.org/cms/server/images/news_events/';
-      console.log('path', path);
+    
       const coverPageData = [];
       const collegeData = [];
       await knex
         .raw(
-          `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,ne.event_date,
-      (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
-      from news_events.news_events ne order by ne.event_date desc limit 5 `
+          `SELECT *, c.c_name FROM tour_description td
+          inner join categories c on td.category_id = c.c_id `
         )
         .then(async ([data]) => {
           if (!data) {
             reply = {
               success: false,
-              message: 'No news or event data is available'
+              message: "No news or event data is available"
             };
           } else {
             reply = {
@@ -360,32 +237,27 @@ const news = [
 
   // get news by id
   {
-    path: '/news/{id}',
-    method: 'GET',
+    path: "/tourPlaces",
+    method: "GET",
     config: {
       auth: {
-        mode: 'optional'
+        mode: "optional"
       }
     },
     handler: async request => {
       let reply = null;
-      const { id } = request.params;
-      const path =
-        'http://www.raghueducational.org/cms/server/images/news_events/';
-      console.log('path', path);
+    
       const coverPageData = [];
       const collegeData = [];
       await knex
         .raw(
-          `select ne.id, ne.title, ne.message as description,CONCAT('${path}', ne.cover_image) as cover_image,ne.event_date,
-      (select GROUP_CONCAT(rg.college SEPARATOR '~') from raghuerp_db.colleges rg where find_in_set(rg.id,ne.college_id)) as category
-      from news_events.news_events ne where ne.id = ${id}`
+          `SELECT id, type, place_name  FROM carousel where status = '1' `
         )
         .then(async ([data]) => {
           if (!data) {
             reply = {
               success: false,
-              message: 'No news or event data is available'
+              message: "No news or event data is available"
             };
           } else {
             reply = {
@@ -396,12 +268,12 @@ const news = [
         });
       return reply;
     }
-  }
+  },
 ];
 
 async function insertOrUpdate(knex, tableName, data) {
   const firstData = data[0] ? data[0] : data;
-  console.log('data', data);
+  console.log("data", data);
   return knex.raw(
     `${knex(tableName)
       .insert(data)
@@ -409,7 +281,7 @@ async function insertOrUpdate(knex, tableName, data) {
       firstData
     )
       .map(field => `${field}=VALUES(${field})`)
-      .join(',  ')}`
+      .join(",  ")}`
   );
 }
 

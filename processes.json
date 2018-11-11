@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "rei-server",
+      "name": "travel-server",
       "script": "./bootstrap.js",
       "watch": "./src",
       "log_date_format": "YYYY-MM-DD HH:mm Z"
