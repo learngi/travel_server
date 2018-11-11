@@ -25,7 +25,7 @@ const academics = [
     handler: async request => {
       let res = null;
       let { data } = request.payload;
-      data = JSON.parse(data);
+      // data = JSON.parse(data);
       // const c_id = documentFiles[0].c_id;
 
       console.log(data,"data in serevr");
