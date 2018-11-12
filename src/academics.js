@@ -24,23 +24,28 @@ const academics = [
 
     handler: async request => {
       let res = null;
-      let { data } = request.payload;
+      let data  = request.payload.uploadDocuments;
+        console.log('123', data)
+      let  documentFiles  = request.payload.academicForm;
+      let temp = JSON.parse(documentFiles)
+      // let documentFiles = request.payload);
+      console.log('date input', JSON.parse(documentFiles))
       // data = JSON.parse(data);
       // const c_id = documentFiles[0].c_id;
 
-      console.log(data,"data in serevr");
-      
+    
 
       let dataFeilds = {
-        name: data['c_id'],
-        availability: data['availability'],
-        amount: data['amount'],
-        date: data['date'],
-        depature: data['depature'],
-        depature_time: data['depature_time'],
-        return_time: data['return_time'],
-        no_of_days: data['no_of_days'],
+        name: temp.c_id,
+        availability: temp.availability,
+        amount: temp.amount,
+        date: temp.date,
+        depature: temp.depature,
+        depature_time: temp.depature_time,
+        return_time: temp.return_time,
+        no_of_days: temp.no_of_days,
       };
+      console.log('sdsdsds',dataFeilds)
 
       await knex('acadamics')
         .insert(dataFeilds)
@@ -49,15 +54,16 @@ const academics = [
           let VALUES = [];
 
           for (const row of data.uploadFiles) {
+ 
+
             if (
               row.documents &&
-              row.documents.hapi &&
-              row.documents.hapi.filename
+              request.payload[`fileUpload${i}`].hapi.filename
             ) {
-              VALUES.push([insertId, row.day, row.des, row.documents.hapi.filename]);
+              VALUES.push([insertId, row.day, row.des, request.payload[`fileUpload${i}`].hapi.filename]);
               const path =
                 config.upload_Documents +
-                row.documents.hapi.filename;
+                request.payload[`fileUpload${i}`].hapi.filename;
               row.documents.pipe(
                 fs.createWriteStream(path)
               );
@@ -72,7 +78,7 @@ const academics = [
           })
 
         })
-      // console.log('d', subjectArray);
+      console.log('d', subjectArray);
       return res;
     }
   },
