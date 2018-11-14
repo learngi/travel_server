@@ -35,7 +35,7 @@ const academics = [
       let dataFeilds = {
         name: request.payload.name,
         availability: request.payload.availability,
-        amount: parseInt(request.payload.amount),
+        amount: Number(request.payload.amount),
         date: request.payload.date,
         depature: request.payload.depature,
         depature_time: request.payload.depature_time,
@@ -44,9 +44,9 @@ const academics = [
       };
       console.log('sdsdsds', dataFeilds);
 
-      let data = request.payload.uploadFiles;
+      let data = JSON.parse(request.payload.uploadFiles);
 
-      console.log('123', data, dataFeilds)
+      console.log('123', data, dataFeilds, request.payload);
 
       await knex('acadamics')
         .insert(dataFeilds)
@@ -56,24 +56,29 @@ const academics = [
 
             console.log('INSERT1', datas);
 
-            let insertId = datas.insertId;
+            let insertId = datas;
            
-
             var i = 0;
             for (const row of data) {
 
-              if (
-                row.documents &&
-                row['documents'].hapi.filename
-              ) {
-                VALUES.push([insertId, row.day, row.des, row['documents'].hapi.filename]);
+              // if (
+              //   row.documents 
+                // &&
+                // request.payload[`fileUpload${i}`].hapi.filename
+              // ) {
+                console.log('in for', request.payload[`fileUpload${i}`].hapi);
+                
+                // let image = row['documents'].hapi.filename;
+                // let description = row.des;
+                VALUES.push([insertId, row.day, row.description, row.image]);
                 const path =
-                  config.upload_Documents +
-                  row['documents'].hapi.filename;
-                row.documents.pipe(
+                  config.upload_Documents + request.payload[`fileUpload${i}`].hapi.filename;
+                  // row['documents'].hapi.filename;
+                  request.payload[`fileUpload${i}`].pipe(
                   fs.createWriteStream(path)
                 );
-              }
+              // }
+              i++;
             }
 
           } catch (err) {
