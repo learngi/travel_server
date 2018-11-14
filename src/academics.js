@@ -24,16 +24,122 @@ const academics = [
 
     handler: async request => {
       let res = null;
-      let data  = request.payload.uploadDocuments;
-        console.log('123', data)
-      let  documentFiles  = request.payload.academicForm;
+      // let data  = request.payload.data;
+      // let  documentFiles  = request.payload.academicForm;
+      // let temp = JSON.parse(data);
+      // let documentFiles = request.payload);
+      // console.log('date input', JSON.parse(documentFiles))
+      // data = JSON.parse(data);
+      // const c_id = documentFiles[0].c_id;    
+
+      let dataFeilds = {
+        name: request.payload.name,
+        availability: request.payload.availability,
+        amount: parseInt(request.payload.amount),
+        date: request.payload.date,
+        depature: request.payload.depature,
+        depature_time: request.payload.depature_time,
+        return_time: request.payload.return_time,
+        no_of_days: request.payload.no_of_days,
+      };
+      console.log('sdsdsds', dataFeilds);
+
+      let data = request.payload.uploadFiles;
+
+      console.log('123', data, dataFeilds)
+
+      await knex('acadamics')
+        .insert(dataFeilds)
+        .then(async ([datas]) => {
+          var VALUES = [];
+          try {
+
+            console.log('INSERT1', datas);
+
+            let insertId = datas.insertId;
+           
+
+            var i = 0;
+            for (const row of data) {
+
+              if (
+                row.documents &&
+                row['documents'].hapi.filename
+              ) {
+                VALUES.push([insertId, row.day, row.des, row['documents'].hapi.filename]);
+                const path =
+                  config.upload_Documents +
+                  row['documents'].hapi.filename;
+                row.documents.pipe(
+                  fs.createWriteStream(path)
+                );
+              }
+            }
+
+          } catch (err) {
+            console.log(err, "ERROR");
+
+          }
+
+          console.log("Values", VALUES);
+          
+
+          await knex.raw(`INSERT INTO acadamics_images(aid, day, description, image) VALUES ?`, [VALUES]).then(async ([insert]) => {
+            console.log('insert', insert);
+
+            res = {
+              success: true,
+              message: 'Success'
+            };
+          }).catch(err => {
+            console.log(err, "ERROR");
+            res = {
+              success: false,
+              message: 'fail'
+            };
+          });
+
+        }).catch(err => {
+          console.log(err, "ERror");
+          res = {
+            success: false,
+            message: 'fail'
+          };
+        });
+      // console.log('d', subjectArray);
+      return res;
+    }
+  },
+
+
+  {
+    method: 'POST',
+    path: '/uploadDocuments2',
+    config: {
+      auth: {
+        mode: 'optional'
+      },
+      payload: {
+        output: 'stream',
+        maxBytes: 10048576,
+        parse: true,
+        allow: 'multipart/form-data',
+        timeout: 110000
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+      let data = request.payload.uploadDocuments;
+      console.log('123', data)
+      let documentFiles = request.payload.academicForm;
       let temp = JSON.parse(documentFiles)
       // let documentFiles = request.payload);
       console.log('date input', JSON.parse(documentFiles))
       // data = JSON.parse(data);
       // const c_id = documentFiles[0].c_id;
 
-    
+
 
       let dataFeilds = {
         name: temp.c_id,
@@ -45,7 +151,7 @@ const academics = [
         return_time: temp.return_time,
         no_of_days: temp.no_of_days,
       };
-      console.log('sdsdsds',dataFeilds)
+      console.log('sdsdsds', dataFeilds)
 
       await knex('acadamics')
         .insert(dataFeilds)
@@ -54,7 +160,7 @@ const academics = [
           let VALUES = [];
 
           for (const row of data.uploadFiles) {
- 
+
 
             if (
               row.documents &&
@@ -82,7 +188,6 @@ const academics = [
       return res;
     }
   },
-
   {
     method: 'POST',
     path: '/uploadDocuments/old',
