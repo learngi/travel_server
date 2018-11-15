@@ -118,81 +118,63 @@ const academics = [
 
 
   {
-    method: 'POST',
-    path: '/uploadDocuments2',
+    method: 'GET',
+    path: '/get/acadamics/list',
     config: {
       auth: {
         mode: 'optional'
-      },
-      payload: {
-        output: 'stream',
-        maxBytes: 10048576,
-        parse: true,
-        allow: 'multipart/form-data',
-        timeout: 110000
       }
     },
-
     handler: async request => {
       let res = null;
-      let data = request.payload.uploadDocuments;
-      console.log('123', data)
-      let documentFiles = request.payload.academicForm;
-      let temp = JSON.parse(documentFiles)
-      // let documentFiles = request.payload);
-      console.log('date input', JSON.parse(documentFiles))
-      // data = JSON.parse(data);
-      // const c_id = documentFiles[0].c_id;
-
-
-
-      let dataFeilds = {
-        name: temp.c_id,
-        availability: temp.availability,
-        amount: temp.amount,
-        date: temp.date,
-        depature: temp.depature,
-        depature_time: temp.depature_time,
-        return_time: temp.return_time,
-        no_of_days: temp.no_of_days,
-      };
-      console.log('sdsdsds', dataFeilds)
-
-      await knex('acadamics')
-        .insert(dataFeilds)
+      await knex.raw(`SELECT a.*, (SELECT c.place_name FROM carousel c WHERE c.id = a.name) AS place_name FROM acadamics a ORDER BY aid ASC`)
         .then(async ([datas]) => {
-          let insertId = datas.insertId;
-          let VALUES = [];
-
-          for (const row of data.uploadFiles) {
-
-
-            if (
-              row.documents &&
-              request.payload[`fileUpload${i}`].hapi.filename
-            ) {
-              VALUES.push([insertId, row.day, row.des, request.payload[`fileUpload${i}`].hapi.filename]);
-              const path =
-                config.upload_Documents +
-                request.payload[`fileUpload${i}`].hapi.filename;
-              row.documents.pipe(
-                fs.createWriteStream(path)
-              );
-            }
+          
+          res = {
+            success:true,
+            data:datas
           }
 
-          await knex.raw(`INSERT INTO acadamics_images(aid, day, description, image) VALUES ?`, [VALUES]).then(async ([insert]) => {
-            res = {
-              success: true,
-              message: 'Success'
-            };
-          })
-
-        })
-      console.log('d', subjectArray);
+        }).catch(err=>{
+          console.log(err,"ERROr");
+          res = {
+            success:false,
+            message:err
+          }
+        });
       return res;
     }
   },
+  {
+    method: 'POST',
+    path: '/get/acadamics/list/details',
+    config: {
+      auth: {
+        mode: 'optional'
+      }
+    },
+    handler: async request => {
+      let res = null;
+      const { aid } = request.payload;
+      await knex.raw(`SELECT ai.* FROM acadamics_images ai WHERE ai.aid = ${aid}`)
+        .then(async ([datas]) => {
+          
+          res = {
+            success:true,
+            data:datas
+          }
+
+        }).catch(err=>{
+          console.log(err,"ERROr");
+          res = {
+            success:false,
+            message:err
+          }
+        });
+      return res;
+    }
+  },
+
   {
     method: 'POST',
     path: '/uploadDocuments/old',
