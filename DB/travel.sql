@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2018 at 05:13 PM
+-- Generation Time: Nov 16, 2018 at 04:55 PM
 -- Server version: 10.1.31-MariaDB
 -- PHP Version: 7.2.3
 
@@ -34,13 +34,28 @@ CREATE TABLE `acadamics` (
   `availability` varchar(50) NOT NULL,
   `amount` float(10,2) NOT NULL,
   `date` date NOT NULL,
-  `departure` varchar(100) NOT NULL,
+  `depature` varchar(100) NOT NULL,
   `depature_time` datetime NOT NULL,
   `return_time` datetime NOT NULL,
   `no_of_days` varchar(15) NOT NULL,
   `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `acadamics`
+--
+
+INSERT INTO `acadamics` (`aid`, `name`, `availability`, `amount`, `date`, `depature`, `depature_time`, `return_time`, `no_of_days`, `created_on`, `modified_on`) VALUES
+(1, '2', 'fhf', 0.00, '2018-11-05', 'ca', '2018-11-15 00:00:00', '2018-11-15 00:00:00', '5', '2018-11-14 22:50:24', '2018-11-14 22:50:24'),
+(2, '1', 'ds', 0.00, '2018-11-06', 'hfg', '2018-11-16 00:00:00', '2018-11-15 00:00:00', '4', '2018-11-14 22:54:24', '2018-11-14 22:54:24'),
+(3, '1', 'ds', 0.00, '2018-11-06', 'hfg', '2018-11-16 00:00:00', '2018-11-15 00:00:00', '4', '2018-11-14 22:55:57', '2018-11-14 22:55:57'),
+(4, '1', 'ghfg', 65.00, '2018-11-12', 'ghgf', '2018-11-15 00:00:00', '2018-11-16 00:00:00', '4', '2018-11-14 23:48:10', '2018-11-14 23:48:10'),
+(5, '1', 'df', 56.00, '2018-11-04', 'kugi', '2018-11-13 00:00:00', '2018-11-15 00:00:00', '3', '2018-11-14 23:52:22', '2018-11-14 23:52:22'),
+(6, '1', 'df', 56.00, '2018-11-04', 'kugi', '2018-11-13 00:00:00', '2018-11-15 00:00:00', '3', '2018-11-14 23:54:07', '2018-11-14 23:54:07'),
+(7, '1', 'df', 56.00, '2018-11-04', 'kugi', '2018-11-13 00:00:00', '2018-11-15 00:00:00', '3', '2018-11-14 23:56:48', '2018-11-14 23:56:48'),
+(8, '1', 'df', 56.00, '2018-11-04', 'kugi', '2018-11-13 00:00:00', '2018-11-15 00:00:00', '3', '2018-11-14 23:58:22', '2018-11-14 23:58:22'),
+(9, '1', 'df', 95.00, '2018-11-04', 'kugi', '2018-11-13 00:00:00', '2018-11-15 00:00:00', '5', '2018-11-15 00:00:47', '2018-11-15 00:00:47');
 
 -- --------------------------------------------------------
 
@@ -57,6 +72,14 @@ CREATE TABLE `acadamics_images` (
   `created_on` datetime DEFAULT CURRENT_TIMESTAMP,
   `modified_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `acadamics_images`
+--
+
+INSERT INTO `acadamics_images` (`ai_id`, `aid`, `day`, `description`, `image`, `created_on`, `modified_on`) VALUES
+(1, 8, 'jgj', 'jbk', 'images1.jpg', '2018-11-14 23:58:22', '2018-11-14 23:58:22'),
+(2, 9, 'jgj', 'jbk', 'images3.jpg', '2018-11-15 00:00:47', '2018-11-15 00:00:47');
 
 -- --------------------------------------------------------
 
@@ -206,13 +229,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `acadamics`
 --
 ALTER TABLE `acadamics`
-  MODIFY `aid` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `aid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `acadamics_images`
 --
 ALTER TABLE `acadamics_images`
-  MODIFY `ai_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ai_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `carousel`
