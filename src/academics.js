@@ -57,26 +57,26 @@ const academics = [
             console.log('INSERT1', datas);
 
             let insertId = datas;
-           
+
             var i = 0;
             for (const row of data) {
 
               // if (
               //   row.documents 
-                // &&
-                // request.payload[`fileUpload${i}`].hapi.filename
+              // &&
+              // request.payload[`fileUpload${i}`].hapi.filename
               // ) {
-                console.log('in for', request.payload[`fileUpload${i}`].hapi);
-                
-                // let image = row['documents'].hapi.filename;
-                // let description = row.des;
-                VALUES.push([insertId, row.day, row.description, row.image]);
-                const path =
-                  config.upload_Documents + request.payload[`fileUpload${i}`].hapi.filename;
-                  // row['documents'].hapi.filename;
-                  request.payload[`fileUpload${i}`].pipe(
-                  fs.createWriteStream(path)
-                );
+              console.log('in for', request.payload[`fileUpload${i}`].hapi);
+
+              // let image = row['documents'].hapi.filename;
+              // let description = row.des;
+              VALUES.push([insertId, row.day, row.description, row.image]);
+              const path =
+                config.upload_Documents + request.payload[`fileUpload${i}`].hapi.filename;
+              // row['documents'].hapi.filename;
+              request.payload[`fileUpload${i}`].pipe(
+                fs.createWriteStream(path)
+              );
               // }
               i++;
             }
@@ -87,7 +87,7 @@ const academics = [
           }
 
           console.log("Values", VALUES);
-          
+
 
           await knex.raw(`INSERT INTO acadamics_images(aid, day, description, image) VALUES ?`, [VALUES]).then(async ([insert]) => {
             console.log('insert', insert);
@@ -116,6 +116,130 @@ const academics = [
     }
   },
 
+  {
+    method: 'POST',
+    path: '/update/acadamics',
+    config: {
+      auth: {
+        mode: 'optional'
+      },
+      payload: {
+        output: 'stream',
+        maxBytes: 10048576,
+        parse: true,
+        allow: 'multipart/form-data',
+        timeout: 110000
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+      let dataFeilds = {
+        name: request.payload.name,
+        availability: request.payload.availability,
+        amount: Number(request.payload.amount),
+        date: request.payload.date,
+        depature: request.payload.depature,
+        depature_time: request.payload.depature_time,
+        return_time: request.payload.return_time,
+        no_of_days: request.payload.no_of_days,
+      };
+      console.log('sdsdsds', dataFeilds);
+
+      await knex('acadamics')
+        .update(dataFeilds)
+        .where('aid', '=', request.payload.aid)
+        .then(async ([datas]) => {
+          res = {
+            success: true,
+            message: 'success'
+          };
+          console.log(datas, "Response");
+        }).catch(err => {
+          console.log(err, "ERror");
+          res = {
+            success: false,
+            message: 'fail'
+          };
+        });
+      // console.log('d', subjectArray);
+      return res;
+    }
+  },
+
+  {
+    method: 'POST',
+    path: '/update/acadamics/images',
+    config: {
+      auth: {
+        mode: 'optional'
+      },
+      payload: {
+        output: 'stream',
+        maxBytes: 10048576,
+        parse: true,
+        allow: 'multipart/form-data',
+        timeout: 110000
+      }
+    },
+
+    handler: async request => {
+      let res = null;
+
+      let dataFeilds = {
+        day: request.payload.day,
+        description: request.payload.description,
+        image: request.payload.image
+      };
+      console.log('sdsdsds', dataFeilds);
+
+      let uploadImage = request.payload.uploadFile;
+
+      await knex('acadamics_images')
+        .update(dataFeilds)
+        .where('ai_id', '=', request.payload.ai_id)
+        .then(async ([datas]) => {
+          var VALUES = [];
+          try {
+
+            console.log('UPDATE', datas);
+
+
+              console.log('in for', uploadImage.hapi.filename);
+
+              const path =
+                config.upload_Documents + uploadImage.hapi.filename;
+
+              uploadImage.pipe(
+                fs.createWriteStream(path)
+              );
+
+              res = {
+                success: true,
+                message: 'Success'
+              };           
+
+          } catch (err) {
+            console.log(err, "ERROR");
+            res = {
+              success: false,
+              message: 'fail'
+            };
+          }
+
+          console.log("Values", VALUES);
+
+        }).catch(err => {
+          console.log(err, "ERror");
+          res = {
+            success: false,
+            message: 'fail'
+          };
+        });
+      // console.log('d', subjectArray);
+      return res;
+    }
+  },
 
   {
     method: 'GET',
@@ -129,17 +253,17 @@ const academics = [
       let res = null;
       await knex.raw(`SELECT a.*, (SELECT c.place_name FROM carousel c WHERE c.id = a.name) AS place_name FROM acadamics a ORDER BY aid ASC`)
         .then(async ([datas]) => {
-          
+
           res = {
-            success:true,
-            data:datas
+            success: true,
+            data: datas
           }
 
-        }).catch(err=>{
-          console.log(err,"ERROr");
+        }).catch(err => {
+          console.log(err, "ERROr");
           res = {
-            success:false,
-            message:err
+            success: false,
+            message: err
           }
         });
       return res;
@@ -158,17 +282,17 @@ const academics = [
       const { aid } = request.payload;
       await knex.raw(`SELECT ai.* FROM acadamics_images ai WHERE ai.aid = ${aid}`)
         .then(async ([datas]) => {
-          
+
           res = {
-            success:true,
-            data:datas
+            success: true,
+            data: datas
           }
 
-        }).catch(err=>{
-          console.log(err,"ERROr");
+        }).catch(err => {
+          console.log(err, "ERROr");
           res = {
-            success:false,
-            message:err
+            success: false,
+            message: err
           }
         });
       return res;
