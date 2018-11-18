@@ -122,13 +122,6 @@ const academics = [
     config: {
       auth: {
         mode: 'optional'
-      },
-      payload: {
-        output: 'stream',
-        maxBytes: 10048576,
-        parse: true,
-        allow: 'multipart/form-data',
-        timeout: 110000
       }
     },
 
@@ -144,12 +137,12 @@ const academics = [
         return_time: request.payload.return_time,
         no_of_days: request.payload.no_of_days,
       };
-      console.log('sdsdsds', dataFeilds);
+      console.log(request.payload,'sdsdsds', dataFeilds);
 
       await knex('acadamics')
         .update(dataFeilds)
-        .where('aid', '=', request.payload.aid)
-        .then(async ([datas]) => {
+        .where('aid', request.payload.aid)
+        .then(async datas => {
           res = {
             success: true,
             message: 'success'
@@ -185,7 +178,6 @@ const academics = [
 
     handler: async request => {
       let res = null;
-
       let dataFeilds = {
         day: request.payload.day,
         description: request.payload.description,
@@ -197,23 +189,16 @@ const academics = [
 
       await knex('acadamics_images')
         .update(dataFeilds)
-        .where('ai_id', '=', request.payload.ai_id)
-        .then(async ([datas]) => {
-          var VALUES = [];
+        .where('ai_id', request.payload.ai_id)
+        .then(async datas => {
           try {
-
-            console.log('UPDATE', datas);
-
-
               console.log('in for', uploadImage.hapi.filename);
-
               const path =
                 config.upload_Documents + uploadImage.hapi.filename;
 
               uploadImage.pipe(
                 fs.createWriteStream(path)
               );
-
               res = {
                 success: true,
                 message: 'Success'
@@ -226,9 +211,6 @@ const academics = [
               message: 'fail'
             };
           }
-
-          console.log("Values", VALUES);
-
         }).catch(err => {
           console.log(err, "ERror");
           res = {
@@ -253,12 +235,10 @@ const academics = [
       let res = null;
       await knex.raw(`SELECT a.*, (SELECT c.place_name FROM carousel c WHERE c.id = a.name) AS place_name FROM acadamics a ORDER BY aid ASC`)
         .then(async ([datas]) => {
-
           res = {
             success: true,
             data: datas
           }
-
         }).catch(err => {
           console.log(err, "ERROr");
           res = {
